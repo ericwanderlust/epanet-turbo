@@ -199,18 +199,6 @@ MIT License - See [LICENSE](LICENSE)
 
 ---
 
-## 🤝 致谢 | Acknowledgments
-
-**EPANET-Turbo** 的诞生离不开水务开源社区的卓越工作：
-
-- **[EPANET](https://github.com/USEPA/EPANET2.2)**: 感谢美国环保署 (EPA) 开发的行业标准仿真引擎。
-- **[WNTR](https://github.com/USEPA/WNTR)**: 感谢 Sandia 国家实验室开发的强大 Python 工具包，为本项目提供了接口设计的核心灵感。
-- **[Polars](https://github.com/pola-rs/polars)**: 提供了极致的数据处理性能。
-
-本项目旨在作为 WNTR 在超大规模管网仿真场景下的极速补充。
-
----
-
 ## ⚖️ 免责声明 | Disclaimer
 
 本软件仅供学术研究和技术交流使用。用户在下载及运行本软件时即表示理解并同意：
@@ -241,9 +229,9 @@ This software is for research and educational purposes only. By using this softw
 
 **EPANET-Turbo** 的诞生离不开以下贡献：
 
-- **Mr. LYH**: 特别感谢其在项目初期提供的关键启发、指导与不懈支持。
+- **Lee Yau Wang (皝神)**: 特别感谢其在项目初期提供的关键启发、指导与不懈支持。
 - **[EPANET](https://github.com/USEPA/EPANET2.2)**: 感谢美国环保署 (EPA) 开发的行业标准仿真引擎。
-- **[WNTR](https://github.com/USEPA/WNTR)**: 感谢 Sandia 国家实验室提供的接口设计灵感。
+- **[WNTR](https://github.com/USEPA/WNTR)**: 感谢 Sandia 国家实验室提供的接口设计灵感，本项目旨在作为 WNTR 在超大型管网场景下的极速补充。
 - **[Polars](https://github.com/pola-rs/polars)**: 提供了极致的数据处理性能。
 
 ---
