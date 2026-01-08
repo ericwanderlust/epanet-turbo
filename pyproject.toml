@@ -1,0 +1,44 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "epanet-turbo"
+version = "0.1.0"
+description = "High-performance EPANET toolkit with Polars parser and OpenMP DLL | 极速水力计算引擎"
+readme = "README.md"
+license = {file = "LICENSE"}
+requires-python = ">=3.10"
+authors = [
+    {name = "ES (Serein)", email = "serein@example.com"}
+]
+keywords = ["epanet", "hydraulic", "simulation", "water", "polars", "openmp"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: Microsoft :: Windows",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Scientific/Engineering",
+]
+dependencies = [
+    "polars>=0.20.0",
+    "numpy>=1.24.0",
+    "pandas>=2.0.0",
+]
+
+[project.urls]
+Homepage = "https://github.com/ericwanderlust/epanet-turbo"
+Repository = "https://github.com/ericwanderlust/epanet-turbo.git"
+
+[tool.setuptools]
+packages = ["epanet_turbo", "pyarmor_runtime_000000"]
+include-package-data = true
+
+[tool.setuptools.package-data]
+epanet_turbo = ["dll/*.dll"]
+pyarmor_runtime_000000 = ["*.pyd", "*.so", "*.dylib"]
