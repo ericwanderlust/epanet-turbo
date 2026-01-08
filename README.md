@@ -16,27 +16,44 @@
 
 ---
 
+## 📚 文档 (Documentation)
+
+- [📖 开发者指南 (Developer Guide)](DEVELOPER_GUIDE.md): 架构说明、编译构建与测试流程。
+- [💾 输出格式规范 (Output Format)](OUTPUT_FORMAT.md): Streaming Sink 结果文件结构说明。
+
+---
+
 ## 🇨🇳 简体中文版
 
-### ✨ 项目简介
+### ⚡ 性能突破 (Performance Breakthroughs)
 
-**EPANET-Turbo** 是基于 EPANET 2.2 的高性能水力计算工具包，专为超大规模管网（10万-40万节点）优化。它通过 Polars 并行解析、OpenMP 多线程仿真及 NumPy 向量化数据提取，显著提升了处理效率。
+EPANET-Turbo v1.1 实现了从“解算效率”到“工程吞吐”的全面进化：
 
-### 🚀 性能对比
+#### 1. 极致吞吐 (High Throughput) - Open-Once 技术
 
-| 技术栈 | 原版 WNTR | EPANET-Turbo | 提升倍率 |
-|--------|-----------|--------------|----------|
-| **INP 解析** | Pandas 逐行 | **Polars 并行 + mmap** | 🚀 **5-6x** |
-| **水力仿真** | EPANET DLL (串行) | **OpenMP 多线程** | ⚡ **1.1-2.2x** |
-| **结果提取** | 逐节点循环 | **NumPy 向量化** | 💨 **100x+** |
+针对大规模调优/滚动预测场景，消除了 90% 的重复初始化开销：
 
-### 📊 真实基准测试
+- **gz_clean (4.7万节点)**: 连续 100 次仿真总耗时从 402s 降至 98s (**🚀 4.1x 整体加速**)
+- **核心逻辑**: 内存驻留句柄 (Open-Once) + 批量向量化参数设置 (Batch Setter)
 
-| 模型规模 | 节点数 | Polars 解析 | WNTR 解析 | 加速比 |
-|----------|--------|-------------|-----------|--------|
-| 10万节点 | 118,796 | 1.07s | 6.49s | **6.1x** |
-| 25万节点 | 280,294 | 2.73s | 16.13s | **5.9x** |
-| **40万节点** | 442,525 | 7.14s | 32.80s | **4.6x** |
+#### 2. 极限规模 (Extreme Scale) - Streaming Sink 技术
+
+彻底解决超大规模模型全量结果提取时的内存溢出问题：
+
+- **40w_fixed (44.2万节点)**:
+  > **"442k nodes × 673 steps, RSS peak 142MB, 352s end-to-end (7-day EPS)"**
+- **核心逻辑**: Memmap 磁盘映射流式入盘 + 批量结果提取 (Batch Getter **50.6x** 加速)
+
+---
+
+### 🚀 核心指标对比 (v1.1 vs WNTR)
+
+| 维度 | 原版 WNTR | EPANET-Turbo v1.1 | 价值体现 |
+|:---|:---|:---|:---|
+| **加载速度** | Pandas 逐行 (32s) | **Polars 并行 (7s)** | 节省 80% 等待时间 |
+| **批处理通量** | 重复 Open/Close | **Open-Once 驻留** | **4x+** 批处理通量 |
+| **提取加速度** | 逐节点循环 (0.07s) | **Batch Getter (1ms)** | **50x+** 极速数据吞吐 |
+| **极限仿真内存** | 随步数线性爆表 | **常数级 RSS (142MB)** | 支撑 44k-40w 规模长时仿真 |
 
 > 测试环境: Windows 10, Intel i7-12700, 32GB RAM, Python 3.12
 
@@ -128,13 +145,39 @@ EPANET-Turbo 收集匿名使用统计（安装次数、版本、IP）以改进�
 
 **EPANET-Turbo** is a high-performance hydraulic computation toolkit based on EPANET 2.2, optimized for large-scale water networks (100K-400K nodes). It delivers massive speedups via Polars parallel parsing, OpenMP multi-threading, and NumPy vectorized extraction.
 
-### 🚀 Performance Highlights
+### ⚡ Performance Breakthroughs (v1.1)
 
-| Stack | Original WNTR | EPANET-Turbo | Speedup |
-|-------|---------------|--------------|---------|
-| **INP Parsing** | Pandas line-by-line | **Polars parallel + mmap** | 🚀 **5-6x** |
-| **Simulation** | EPANET DLL (serial) | **OpenMP multi-threaded** | ⚡ **1.1-2.2x** |
-| **Extraction** | Per-node iteration | **NumPy vectorized** | 💨 **100x+** |
+EPANET-Turbo v1.1 achieves a complete evolution from "solver efficiency" to "engineering throughput":
+
+#### 1. High Throughput - Open-Once Technology
+
+Eliminates 90% of repetitive initialization overhead for large-scale calibration/rolling prediction:
+
+- **gz_clean (47k nodes)**: Total time for 100 consecutive simulations reduced from 402s to 98s (**🚀 4.1x speedup**)
+- **Core Logic**: Memory-resident handles (Open-Once) + Batch Vectorized Parameter Setting (Batch Setter)
+
+#### 2. Extreme Scale - Streaming Sink Technology
+
+Solves memory overflow issues when extracting full results for ultra-large models:
+
+- **40w_fixed (442k nodes)**:
+  > **"442k nodes × 673 steps, RSS peak 142MB, 352s end-to-end (7-day EPS)"**
+- **Core Logic**: Memmap disk-streaming + Batch Result Extraction (Batch Getter **50.6x** speedup)
+
+---
+
+### 🚀 Core Metrics Comparison (v1.1 vs WNTR)
+
+| Metric | Original WNTR | EPANET-Turbo v1.1 | Value |
+|:---|:---|:---|:---|
+| **Loading Speed** | Pandas row-by-row (32s) | **Polars Parallel (7s)** | **6x** Fast Preprocessing |
+| **Batch Throughput** | Repeated Open/Close | **Open-Once Resident** | **4x+** Prediction Throughput |
+| **Data Extraction** | Per-node Iteration (0.07s) | **Batch Getter (1ms)** | **50x+** Fast Data I/O |
+| **Peak Memory** | Linear with steps (OOM) | **Constant RSS (142MB)**| Essential for **100k-400k** nodes |
+
+> Environment: Windows 10, Intel i7-12700, 32GB RAM, Python 3.12
+
+---
 
 ---
 

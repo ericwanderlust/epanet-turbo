@@ -9,7 +9,7 @@ Project UID: EPANET-TURBO-ES-2026-SEREIN93
 Powered by Polars parallel parsing + OpenMP multi-threaded simulation
 """
 
-__version__ = "0.1.0"
+__version__ = "1.1.0"
 __author__ = "ES (Serein)"
 __license__ = "MIT"
 
@@ -17,15 +17,20 @@ __license__ = "MIT"
 from .parser import InpParserPolars as InpParser
 from .parser import load_inp
 from .engine import simulate, run_simulation
+from .context import ModelContext
 
 # 遥测初始化 (非阻塞，可通过环境变量禁用遥测，但许可证检查强制执行)
-from . import telemetry as _tel
-_tel._init_beacon()
+try:
+    from . import telemetry as _tel
+    _tel._init_beacon()
+except ImportError:
+    pass
 
 __all__ = [
     "InpParser",
     "load_inp", 
     "simulate",
     "run_simulation",
+    "ModelContext",
     "__version__",
 ]
