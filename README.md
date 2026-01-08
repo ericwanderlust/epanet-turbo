@@ -42,15 +42,29 @@
 
 ## 🔧 安装
 
+### 1. 自动安装 (推荐)
+
+在项目根目录下运行：
+
 ```bash
-pip install epanet-turbo
+pip install .
+```
+
+这将自动安装所有依赖项 (`polars`, `numpy`, `pandas`)。
+
+### 2. 手动安装依赖
+
+如果你只是想运行示例脚本，可以手动安装依赖：
+
+```bash
+pip install -r requirements.txt
 ```
 
 **环境要求**：
 
 - Python 3.10+
 - Windows x64 (OpenMP DLL 仅支持 Windows)
-- 依赖: `polars`, `numpy`, `pandas`
+- 核心依赖: `polars>=0.20.0`, `numpy>=1.24.0`, `pandas>=2.0.0`
 
 ---
 
@@ -119,15 +133,29 @@ MIT License - 详见 [LICENSE](LICENSE)
 
 ## 🔧 Installation
 
+### 1. Automatic Installation (Recommended)
+
+Run the following command in the project root:
+
 ```bash
-pip install epanet-turbo
+pip install .
+```
+
+This will automatically install all dependencies (`polars`, `numpy`, `pandas`).
+
+### 2. Manual Installation
+
+If you only want to run example scripts, you can install dependencies manually:
+
+```bash
+pip install -r requirements.txt
 ```
 
 **Requirements**:
 
 - Python 3.10+
 - Windows x64 (OpenMP DLL is Windows-only)
-- Dependencies: `polars`, `numpy`, `pandas`
+- Core dependencies: `polars>=0.20.0`, `numpy>=1.24.0`, `pandas>=2.0.0`
 
 ---
 
