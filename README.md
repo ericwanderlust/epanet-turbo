@@ -16,17 +16,19 @@
 
 ---
 
-## ✨ 项目简介
+## 🇨🇳 简体中文版
 
-**EPANET-Turbo** 是基于 EPANET 2.2 的高性能水力计算工具包，专为超大规模管网（10万-40万节点）优化。
+### ✨ 项目简介
+
+**EPANET-Turbo** 是基于 EPANET 2.2 的高性能水力计算工具包，专为超大规模管网（10万-40万节点）优化。它通过 Polars 并行解析、OpenMP 多线程仿真及 NumPy 向量化数据提取，显著提升了处理效率。
 
 ### 🚀 性能对比
 
 | 技术栈 | 原版 WNTR | EPANET-Turbo | 提升倍率 |
 |--------|-----------|--------------|----------|
-| INP 解析 | Pandas 逐行 | **Polars 并行 + mmap** | 🚀 **5-6x** |
-| 水力仿真 | EPANET DLL (串行) | **OpenMP 多线程** | ⚡ **1.1-2.2x** |
-| 结果提取 | 逐节点循环 | **NumPy 向量化** | 💨 **100x+** |
+| **INP 解析** | Pandas 逐行 | **Polars 并行 + mmap** | 🚀 **5-6x** |
+| **水力仿真** | EPANET DLL (串行) | **OpenMP 多线程** | ⚡ **1.1-2.2x** |
+| **结果提取** | 逐节点循环 | **NumPy 向量化** | 💨 **100x+** |
 
 ### 📊 真实基准测试
 
@@ -40,9 +42,9 @@
 
 ---
 
-## 🔧 安装
+### 🔧 安装说明
 
-### 1. 自动安装 (推荐)
+#### 1. 自动安装 (推荐)
 
 在项目根目录下运行：
 
@@ -50,11 +52,11 @@
 pip install .
 ```
 
-这将自动安装所有依赖项 (`polars`, `numpy`, `pandas`)。
+这将自动安装所有核心依赖项。
 
-### 2. 手动安装依赖
+#### 2. 手动安装
 
-如果你只是想运行示例脚本，可以手动安装依赖：
+如果你只需运行脚本，可先安装依赖：
 
 ```bash
 pip install -r requirements.txt
@@ -68,84 +70,85 @@ pip install -r requirements.txt
 
 ---
 
-## 🚀 快速入门
+### 🚀 快速入门
 
 ```python
 from epanet_turbo import InpParser, simulate
 
 # 1. 超快速解析 INP 文件
-parser = InpParser("large_network.inp")
-print(f"节点数: {parser.num_nodes}, 管道数: {parser.num_links}")
+parser = InpParser("network.inp")
+print(f"节点: {parser.num_nodes}, 管道: {parser.num_links}")
 
 # 2. 运行 OpenMP 并行仿真
-pressures, flows = simulate("large_network.inp")
-print(f"时间步: {len(pressures)}")
+pressures, flows = simulate("network.inp")
 
 # 3. 向量化访问坐标
-x, y = parser.get_node_coordinates("Node_12345")
+x, y = parser.get_node_coordinates("Node_123")
 ```
 
 ---
 
-## 📡 使用统计
+### 🛡️ 安全、合规与统计
 
-EPANET-Turbo 会收集匿名使用统计（安装次数、版本号、IP），帮助我们改进产品。
+#### 📡 使用统计 (Telemetry)
 
-**不会收集任何模型数据或敏感个人信息。**
+EPANET-Turbo 收集匿名使用统计（安装次数、版本、IP）以改进产品。**不收集任何模型数据或隐私信息。**
+禁用：`set EPANET_TURBO_NO_TELEMETRY=1`
 
-禁用方法：
+#### 🔐 核心保护
 
-```bash
-set EPANET_TURBO_NO_TELEMETRY=1
-```
+- **工业级混淆**: 业务逻辑已通过 PyArmor 加密。
+- **许可证验证**: 每次运行会校验授权，作者保留对滥用行为停用授权的权利。
+
+#### ⚖️ 免责声明
+
+1. **风险自担**: 用户对使用产生的任何结果负全责。
+2. **非商业保证**: 不保证所有环境下的绝对稳定。
+3. **法律依从**: 请确保使用行为符合当地法律。
+
+---
+
+### 🤝 致谢
+
+**EPANET-Turbo** 的诞生离不开以下贡献：
+
+- **Lee Yau-Wang (皝神)**: 特别感谢其在项目初期提供的关键启发、指导与不懈支持。
+- **[EPANET](https://github.com/USEPA/EPANET2.2)**: 感谢美国环保署 (EPA) 开发的标准仿真引擎。
+- **[WNTR](https://github.com/USEPA/WNTR)**: 本项目旨在作为 WNTR 在超大型管网场景下的极速补充。
 
 ---
 
-## 📜 许可证
-
-MIT License - 详见 [LICENSE](LICENSE)
-
-**附加条款**: 作者保留在发现滥用时撤销使用许可的权利。
-
----
+<br>
 
 <a name="english"></a>
 
-<div align="center">
+## 🇬🇧 English Version
 
-# English Documentation
+### ✨ About
 
-</div>
+**EPANET-Turbo** is a high-performance hydraulic computation toolkit based on EPANET 2.2, optimized for large-scale water networks (100K-400K nodes). It delivers massive speedups via Polars parallel parsing, OpenMP multi-threading, and NumPy vectorized extraction.
 
-## ✨ About
+### 🚀 Performance Highlights
 
-**EPANET-Turbo** is a high-performance hydraulic computation toolkit based on EPANET 2.2, optimized for large-scale water networks (100K-400K nodes).
-
-### Performance Highlights
-
-| Component | Original WNTR | EPANET-Turbo | Speedup |
-|-----------|---------------|--------------|---------|
-| INP Parsing | Pandas line-by-line | **Polars parallel + mmap** | 🚀 **5-6x** |
-| Simulation | EPANET DLL (serial) | **OpenMP multi-threaded** | ⚡ **1.1-2.2x** |
-| Result Extraction | Per-node iteration | **NumPy vectorized** | 💨 **100x+** |
+| Stack | Original WNTR | EPANET-Turbo | Speedup |
+|-------|---------------|--------------|---------|
+| **INP Parsing** | Pandas line-by-line | **Polars parallel + mmap** | 🚀 **5-6x** |
+| **Simulation** | EPANET DLL (serial) | **OpenMP multi-threaded** | ⚡ **1.1-2.2x** |
+| **Extraction** | Per-node iteration | **NumPy vectorized** | 💨 **100x+** |
 
 ---
 
-## 🔧 Installation
+### 🔧 Installation
 
-### 1. Automatic Installation (Recommended)
+#### 1. Automatic (Recommended)
 
-Run the following command in the project root:
+Run in project root:
 
 ```bash
 pip install .
 ```
 
-This will automatically install all dependencies (`polars`, `numpy`, `pandas`).
-
-### 2. Manual Installation
-
-If you only want to run example scripts, you can install dependencies manually:
+#### 2. Manual Dependencies
 
 ```bash
 pip install -r requirements.txt
@@ -155,84 +158,54 @@ pip install -r requirements.txt
 
 - Python 3.10+
 - Windows x64 (OpenMP DLL is Windows-only)
-- Core dependencies: `polars>=0.20.0`, `numpy>=1.24.0`, `pandas>=2.0.0`
+- Deps: `polars>=0.20.0`, `numpy>=1.24.0`, `pandas>=2.0.0`
 
 ---
 
-## 🚀 Quick Start
+### 🚀 Quick Start
 
 ```python
 from epanet_turbo import InpParser, simulate
 
-# 1. Ultra-fast INP parsing
-parser = InpParser("large_network.inp")
-print(f"Nodes: {parser.num_nodes}, Links: {parser.num_links}")
+# 1. Ultra-fast parsing
+parser = InpParser("network.inp")
 
-# 2. Run OpenMP parallel simulation
-pressures, flows = simulate("large_network.inp")
+# 2. Run parallel simulation
+pressures, flows = simulate("network.inp")
 
-# 3. Vectorized coordinate access
-x, y = parser.get_node_coordinates("Node_12345")
+# 3. Vectorized access
+x, y = parser.get_node_coordinates("Node_123")
 ```
 
 ---
 
-## 📡 Telemetry
+### 🛡️ Compliance & Telemetry
 
-EPANET-Turbo collects anonymous usage statistics (install count, version, IP) to improve the product.
+#### 📡 Telemetry
 
-**No model data or sensitive personal information is collected.**
+Anonymous usage stats (install count, version, IP) are collected for improvement. **No model data or personal info collected.**
+Disable: `set EPANET_TURBO_NO_TELEMETRY=1`
 
-To disable:
+#### 🔐 Protection
 
-```bash
-set EPANET_TURBO_NO_TELEMETRY=1
-```
+- **Obfuscation**: Logic encrypted via PyArmor.
+- **Licensing**: Remote license check enforced. Abuse may lead to revocation.
 
----
+#### ⚖️ Disclaimer
 
-## 📜 License
-
-MIT License - See [LICENSE](LICENSE)
-
-**Additional Terms**: The author reserves the right to revoke license upon abuse detection.
+1. **At Own Risk**: User assumes full responsibility for results.
+2. **No Warranty**: Stability is not guaranteed for all environments.
+3. **Legal**: Ensure compliance with local regulations.
 
 ---
 
-## ⚖️ 免责声明 | Disclaimer
+### 🤝 Acknowledgments
 
-本软件仅供学术研究和技术交流使用。用户在下载及运行本软件时即表示理解并同意：
+Special thanks to the following for their contributions:
 
-1. **风险自担**: 用户需对使用本软件产生的任何结果（包括但不限于数据丢失、计算错误等）负全部责任。
-2. **非商业保证**: 作者不保证软件在所有环境下的稳定性，亦不对任何直接或间接损失承担责任。
-3. **法律依从**: 用户应确保其使用行为符合当地法律法规。
-
-This software is for research and educational purposes only. By using this software, you agree:
-
-1. **Use at Own Risk**: The author is not responsible for any issues or damages.
-2. **No Warranty**: Stability is not guaranteed.
-3. **Compliance**: Ensure your usage follows local laws.
-
----
-
-## 🛡️ 安全与合规 | Security & Compliance
-
-为保护作者权益及防止滥用，本软件包含以下底层机制：
-
-- **核心混淆**: 关键业务逻辑已通过 PyArmor 进行工业级加密。
-- **许可证验证**: 每次运行会验证设备授权状态，作者保留单方面停用滥用设备的权利。
-- **匿名遥测**: 仅收集非敏感的系统环境信息，详情见 [📡 使用统计](#-使用统计)。
-
----
-
-## 🤝 致谢 | Acknowledgments
-
-**EPANET-Turbo** 的诞生离不开以下贡献：
-
-- **Lee Yau Wang (皝神)**: 特别感谢其在项目初期提供的关键启发、指导与不懈支持。
-- **[EPANET](https://github.com/USEPA/EPANET2.2)**: 感谢美国环保署 (EPA) 开发的行业标准仿真引擎。
-- **[WNTR](https://github.com/USEPA/WNTR)**: 感谢 Sandia 国家实验室提供的接口设计灵感，本项目旨在作为 WNTR 在超大型管网场景下的极速补充。
-- **[Polars](https://github.com/pola-rs/polars)**: 提供了极致的数据处理性能。
+- **Lee Yau-Wang (皝神)**: For critical inspiration, guidance, and endless support.
+- **[EPANET](https://github.com/USEPA/EPANET2.2)**: For the industry-standard simulation engine.
+- **[WNTR](https://github.com/USEPA/WNTR)**: This project is a performance-boosted extension for large-scale WNTR scenarios.
 
 ---
 
