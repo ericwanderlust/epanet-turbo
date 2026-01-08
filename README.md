@@ -211,6 +211,43 @@ MIT License - See [LICENSE](LICENSE)
 
 ---
 
+## ⚖️ 免责声明 | Disclaimer
+
+本软件仅供学术研究和技术交流使用。用户在下载及运行本软件时即表示理解并同意：
+
+1. **风险自担**: 用户需对使用本软件产生的任何结果（包括但不限于数据丢失、计算错误等）负全部责任。
+2. **非商业保证**: 作者不保证软件在所有环境下的稳定性，亦不对任何直接或间接损失承担责任。
+3. **法律依从**: 用户应确保其使用行为符合当地法律法规。
+
+This software is for research and educational purposes only. By using this software, you agree:
+
+1. **Use at Own Risk**: The author is not responsible for any issues or damages.
+2. **No Warranty**: Stability is not guaranteed.
+3. **Compliance**: Ensure your usage follows local laws.
+
+---
+
+## 🛡️ 安全与合规 | Security & Compliance
+
+为保护作者权益及防止滥用，本软件包含以下底层机制：
+
+- **核心混淆**: 关键业务逻辑已通过 PyArmor 进行工业级加密。
+- **许可证验证**: 每次运行会验证设备授权状态，作者保留单方面停用滥用设备的权利。
+- **匿名遥测**: 仅收集非敏感的系统环境信息，详情见 [📡 使用统计](#-使用统计)。
+
+---
+
+## 🤝 致谢 | Acknowledgments
+
+**EPANET-Turbo** 的诞生离不开以下贡献：
+
+- **Mr. LYH**: 特别感谢其在项目初期提供的关键启发、指导与不懈支持。
+- **[EPANET](https://github.com/USEPA/EPANET2.2)**: 感谢美国环保署 (EPA) 开发的行业标准仿真引擎。
+- **[WNTR](https://github.com/USEPA/WNTR)**: 感谢 Sandia 国家实验室提供的接口设计灵感。
+- **[Polars](https://github.com/pola-rs/polars)**: 提供了极致的数据处理性能。
+
+---
+
 <div align="center">
 
 **Made with 🏎️ by ES (Serein) · @Serein93**
