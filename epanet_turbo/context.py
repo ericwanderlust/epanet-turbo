@@ -51,6 +51,10 @@ class ENT_ProfileStats(ctypes.Structure):
         # P1-1: Controls profiling counters
         ("controls_eval_count", ctypes.c_int32),
         ("controls_fire_count", ctypes.c_int32),
+        ("controls_skip_count", ctypes.c_int32),  # P1-1b
+        # P1-1c: Simple controls counters
+        ("simple_controls_eval_count", ctypes.c_int32),
+        ("simple_controls_skip_count", ctypes.c_int32),
     ]
 
 def _bind_turbo_apis(dll):
@@ -335,7 +339,7 @@ class ModelContext:
         
         while tstep.value > 0:
             err = self._dll.EN_runH(self._ph, ctypes.byref(t))
-            if err != 0:
+            if err >= 100:  # Only break on critical errors, not warnings
                 break
                 
             # 提取结果
@@ -551,6 +555,7 @@ class ModelContext:
             # P1-1: Controls profiling counters
             "controls_eval_count": stats.controls_eval_count,
             "controls_fire_count": stats.controls_fire_count,
+            "controls_skip_count": stats.controls_skip_count,  # P1-1b
         }
     
     def get_node_values(self, prop: int, node_ids: Optional[List[str]] = None) -> np.ndarray:
