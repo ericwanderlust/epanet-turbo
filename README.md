@@ -27,7 +27,7 @@
 
 ### ⚡ 性能突破 (Performance Breakthroughs)
 
-EPANET-Turbo v1.1 实现了从“解算效率”到“工程吞吐”的全面进化：
+EPANET-Turbo v1.2 实现了从“解算效率”到“工程吞吐”的全面进化：
 
 #### 1. 极致吞吐 (High Throughput) - Open-Once 技术
 
@@ -67,9 +67,9 @@ EPANET-Turbo v1.1 实现了从“解算效率”到“工程吞吐”的全面�
 
 ---
 
-### 🚀 核心指标对比 (v1.1 vs WNTR)
+### 🚀 核心指标对比 (v1.2 vs WNTR)
 
-| 维度 | 原版 WNTR | EPANET-Turbo v1.1 | 价值体现 |
+| 维度 | 原版 WNTR | EPANET-Turbo v1.2 | 价值体现 |
 |:---|:---|:---|:---|
 | **加载速度** | Pandas 逐行 (32s) | **Polars 并行 (7s)** | 节省 80% 等待时间 |
 | **批处理通量** | 重复 Open/Close | **Open-Once 驻留** | **4x+** 批处理通量 |
@@ -166,9 +166,9 @@ EPANET-Turbo 收集匿名使用统计（安装次数、版本、IP）以改进�
 
 **EPANET-Turbo** is a high-performance hydraulic computation toolkit based on EPANET 2.2, optimized for large-scale water networks (100K-400K nodes). It delivers massive speedups via Polars parallel parsing, OpenMP multi-threading, and NumPy vectorized extraction.
 
-### ⚡ Performance Breakthroughs (v1.1)
+### ⚡ Performance Breakthroughs (v1.2)
 
-EPANET-Turbo v1.1 achieves a complete evolution from "solver efficiency" to "engineering throughput":
+EPANET-Turbo v1.2 achieves a complete evolution from "solver efficiency" to "engineering throughput":
 
 #### 1. High Throughput - Open-Once Technology
 
@@ -208,9 +208,9 @@ The roadmap for pushing the boundaries of hydraulic simulation:
 
 ---
 
-### 🚀 Core Metrics Comparison (v1.1 vs WNTR)
+### 🚀 Core Metrics Comparison (v1.2 vs WNTR)
 
-| Metric | Original WNTR | EPANET-Turbo v1.1 | Value |
+| Metric | Original WNTR | EPANET-Turbo v1.2 | Value |
 |:---|:---|:---|:---|
 | **Loading Speed** | Pandas row-by-row (32s) | **Polars Parallel (7s)** | **6x** Fast Preprocessing |
 | **Batch Throughput** | Repeated Open/Close | **Open-Once Resident** | **4x+** Prediction Throughput |
