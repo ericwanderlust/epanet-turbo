@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.3.0] - 2026-01-09 - Cache & Output Hardening
+
+### ⚡ Performance & Cold Start (M3)
+
+- **M3-1 ID Cache Acceleration**: Introduced automatic `.inp.cache` mechanism for network topology. Achieved **6.6x speedup** on 10w node models (2.10s -> 0.32s).
+- **M3-2 Streaming Protocol V1**: Standardized binary output format with 512B persistent header. Support for `.meta.json` metadata separation.
+- **Core De-encryption**: Restored unencrypted source code for `parser`, `engine`, `context`, and `streaming` modules for deep optimization.
+
+### 🛠️ Improvements
+
+- **IO Refactoring**: Optimized `EppEngine` to reduce Python-to-C overhead during streaming.
+- **Improved Metadata**: Standardized output units and versioning in `.meta.json`.
+
 ## [1.2.0] - 2026-01-09 - Performance & Controls Milestone
 
 ### 🏎️ Performance Optimizations (M2)
