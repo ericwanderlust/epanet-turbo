@@ -52,13 +52,21 @@ EPANET-Turbo v1.2 实现了从“解算效率”到“工程吞吐”的全面�
 - **实测表现**: 在典型城市级 EPS 模型中，规则评估次数降低 **99%**，`rules_eval_count` 从数万次降至个位数。
 - **深度透视**: 提供 `ENT_get_profile` API，支持对矩阵装配、线性求解、规则评估耗时的纳秒级监控。
 
+#### 4. 冷启动加速 (Cold Start Acceleration) - v1.3 新特性 🚀
+
+引入自动化的模型缓存机制与流式协议标准化：
+
+- **ID Cache**: 自动在此目录生成 `.inp.cache` 文件，缓存网络拓扑与索引。
+  - **实测效果**: 10万节点模型解析耗时从 **2.10s 降至 0.32s (6.6x 加速)**。
+- **Streaming Protocol V1**: 定义了标准的二进制输出协议 (Start Header 512B)，支持元数据与二进制流分离，确保结果文件的长期可读性与兼容性。
+
 ---
 
 ### 🗺️ 技术蓝图 (Technical Blueprint)
 
 我们将持续在以下维度深挖水力计算的极限：
 
-- **[M3] 冷启动加速**: 引入 ID 索引缓存与 Baseline Snapshot，实现模型的秒级恢复与“热启动”。
+- **[M3] 冷启动加速 (已完成)**: 实现自动 ID 缓存 (6x 加速) 与 Streaming Protocol V1，支持 40w+ 节点模型的秒级加载。
 - **[M4] 核心对齐**: 同步 OWA-EPANET v2.3.3 最新改进，确保数值计算的一致性与前沿性。
 - **[M5] 线程控制**: 提供多轨 DLL 支持 (Serial/OpenMP)，支持在 Python 端动态切换计算引擎。
 - **[M6] 跨平台**: 实现 Linux (Ubuntu/CentOS) 与 macOS (M1/M2) 的原生支持。

@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "epanet-turbo"
-version = "1.2.0"
+version = "1.3.0"
 description = "High-performance EPANET toolkit with Polars parser and OpenMP DLL | 极速水力计算引擎"
 readme = "README.md"
 license = {file = "LICENSE"}
