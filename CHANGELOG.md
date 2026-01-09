@@ -2,6 +2,14 @@
 
 All notable changes to EPANET-Turbo will be documented in this file.
 
+## [1.1.2] - 2026-01-09
+
+### 🛡️ Engineering & Stability (Build Green)
+
+- **Header Inclusion Contract**: Enforced `types.h` -> `funcs.h` order using `#error` mechanism to prevent build cascading failures.
+- **Build Stabilization**: Fixed `rules.c` syntax errors and header order in 18 source files.
+- **DLL Production**: Standard `epanet2.dll` is now stably reproducible via CMake.
+
 ## [1.1.0] - 2026-01-09
 
 ### 🚀 Major Features
