@@ -143,8 +143,8 @@ EPANET-Turbo 收集匿名使用统计（安装次数、版本、IP）以改进�
 
 #### 🔐 核心保护
 
-- **工业级混淆**: 业务逻辑已通过 PyArmor 加密。
-- **许可证验证**: 每次运行会校验授权，作者保留对滥用行为停用授权的权利。
+- **核心代码保护**: 核心逻辑已封包发布，保障知识产权。
+- **开箱即用**: 默认无需人工授权或联网激活，简化部署流程。
 
 #### ⚖️ 免责声明
 
@@ -207,12 +207,14 @@ Zero-overhead simulation for models with complex rule logic:
 
 The roadmap for pushing the boundaries of hydraulic simulation:
 
-- **[M3] Cold Start Acceleration**: ID index caching and baseline snapshots for near-instant model loading.
-- **[M4] Upstream Sync**: Alignment with OWA-EPANET v2.3.3 for numerical consistency and latest fixes.
-- **[M5] Unified Build Matrix**: Support for both Serial and OpenMP engines with dynamic switching.
-- **[M6] Cross-platform**: Native support for Linux (Ubuntu/CentOS) and macOS (ARM/Intel).
-- **[M7] Rust Acceleration Layer**: Replacing bridge logic with high-performance Rust kernels.
-- **[M8] GPU Empowerment**: Offloading large-scale ensemble analytics and water quality post-processing to GPUs.
+| Milestone | Description | Version | Status |
+|:----------|:------------|:--------|:-------|
+| M3 | Cache & Output Hardening | v1.3.0 | ✅ Completed |
+| M4 | Upstream Baseline Sync | v1.4.0 | 🔥 In Progress |
+| M5 | Unified Cross-platform Build | v1.5.0 | 📅 Planned |
+| M6 | Linux/macOS Official Support | v2.0.0 | 📅 Planned |
+| M7 | Rust Acceleration Layer | v2.1+ | 📅 Planned |
+| M8 | GPU Empowerment | v2.1+ | 📅 Planned |
 
 ---
 
@@ -281,8 +283,8 @@ Disable: `set EPANET_TURBO_NO_TELEMETRY=1`
 
 #### 🔐 Protection
 
-- **Obfuscation**: Logic encrypted via PyArmor.
-- **Licensing**: Remote license check enforced. Abuse may lead to revocation.
+- **Code Protection**: Core logic is distributed as encrypted package to protect IP.
+- **Ready to Use**: No manual activation or online check required by default.
 
 #### ⚖️ Disclaimer
 
