@@ -48,6 +48,9 @@ class ENT_ProfileStats(ctypes.Structure):
         ("controls", ctypes.c_double),
         ("step_count", ctypes.c_int32),
         ("iter_count", ctypes.c_int32),
+        # P1-1: Controls profiling counters
+        ("controls_eval_count", ctypes.c_int32),
+        ("controls_fire_count", ctypes.c_int32),
     ]
 
 def _bind_turbo_apis(dll):
@@ -544,7 +547,10 @@ class ModelContext:
             "controls_s": stats.controls,
             "step_count": stats.step_count,
             "iter_count": stats.iter_count,
-            "solve_efficiency": (stats.assemble + stats.linear_solve) / stats.total if stats.total > 0 else 0
+            "solve_efficiency": (stats.assemble + stats.linear_solve) / stats.total if stats.total > 0 else 0,
+            # P1-1: Controls profiling counters
+            "controls_eval_count": stats.controls_eval_count,
+            "controls_fire_count": stats.controls_fire_count,
         }
     
     def get_node_values(self, prop: int, node_ids: Optional[List[str]] = None) -> np.ndarray:
