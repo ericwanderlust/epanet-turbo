@@ -44,6 +44,27 @@ EPANET-Turbo v1.1 实现了从“解算效率”到“工程吞吐”的全面�
   > **"442k nodes × 673 steps, RSS peak 142MB, 352s end-to-end (7-day EPS)"**
 - **核心逻辑**: Memmap 磁盘映射流式入盘 + 批量结果提取 (Batch Getter **50.6x** 加速)
 
+#### 3. 智能优化 (Intelligent Optimization) - v1.2 新特性 🚀
+
+针对含有复杂规则 (Rules) 的大型巡检模型，通过算法裁剪实现零开销：
+
+- **Time-only Rules Skip**: 自动识别仅时间触发的规则。在未到触发时间前，算法直接跳过规则评估。
+- **实测表现**: 在典型城市级 EPS 模型中，规则评估次数降低 **99%**，`rules_eval_count` 从数万次降至个位数。
+- **深度透视**: 提供 `ENT_get_profile` API，支持对矩阵装配、线性求解、规则评估耗时的纳秒级监控。
+
+---
+
+### 🗺️ 技术蓝图 (Technical Blueprint)
+
+我们将持续在以下维度深挖水力计算的极限：
+
+- **[M3] 冷启动加速**: 引入 ID 索引缓存与 Baseline Snapshot，实现模型的秒级恢复与“热启动”。
+- **[M4] 核心对齐**: 同步 OWA-EPANET v2.3.3 最新改进，确保数值计算的一致性与前沿性。
+- **[M5] 线程控制**: 提供多轨 DLL 支持 (Serial/OpenMP)，支持在 Python 端动态切换计算引擎。
+- **[M6] 跨平台**: 实现 Linux (Ubuntu/CentOS) 与 macOS (M1/M2) 的原生支持。
+- **[M7] Rust 加速层**: 利用 Rust 重写 Batch API 与内部调度器，消除 Python - C 桥接的所有残余开销。
+- **[M8] GPU 赋能**: 利用 GPU 处理超大规模场景并行 (Scenario-Ensemble) 与水质后处理张量运算。
+
 ---
 
 ### 🚀 核心指标对比 (v1.1 vs WNTR)
@@ -163,6 +184,27 @@ Solves memory overflow issues when extracting full results for ultra-large model
 - **40w_fixed (442k nodes)**:
   > **"442k nodes × 673 steps, RSS peak 142MB, 352s end-to-end (7-day EPS)"**
 - **Core Logic**: Memmap disk-streaming + Batch Result Extraction (Batch Getter **50.6x** speedup)
+
+#### 3. Intelligent Optimization - v1.2 New Features 🚀
+
+Zero-overhead simulation for models with complex rule logic:
+
+- **Time-only Rules Skip**: Automatically detects time-dependent rules and skips evaluation until the next trigger point.
+- **Performance**: Achieves **99% reduction** in rule evaluation counts for typical city-scale EPS models.
+- **Deep Profiling**: New `ENT_get_profile` API for nanosecond-level monitoring of matrix assembly, linear solving, and rule evaluation.
+
+---
+
+### 🗺️ Technical Blueprint
+
+The roadmap for pushing the boundaries of hydraulic simulation:
+
+- **[M3] Cold Start Acceleration**: ID index caching and baseline snapshots for near-instant model loading.
+- **[M4] Upstream Sync**: Alignment with OWA-EPANET v2.3.3 for numerical consistency and latest fixes.
+- **[M5] Unified Build Matrix**: Support for both Serial and OpenMP engines with dynamic switching.
+- **[M6] Cross-platform**: Native support for Linux (Ubuntu/CentOS) and macOS (ARM/Intel).
+- **[M7] Rust Acceleration Layer**: Replacing bridge logic with high-performance Rust kernels.
+- **[M8] GPU Empowerment**: Offloading large-scale ensemble analytics and water quality post-processing to GPUs.
 
 ---
 

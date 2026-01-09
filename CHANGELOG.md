@@ -1,6 +1,25 @@
 # Changelog
 
-All notable changes to EPANET-Turbo will be documented in this file.
+All notable changes to this project will be documented in this file.
+
+## [1.2.0] - 2026-01-09 - Performance & Controls Milestone
+
+### 🏎️ Performance Optimizations (M2)
+
+- **M2-1 Time-only Rules Skip**: Added optimization to skip evaluation of rules that only depend on time until their next trigger point. Achieved **99% skip ratio** on time-based models.
+- **M2-0 Profiling Decomposition**: Separated rules evaluation and simple controls evaluation in the profiling report for better bottleneck analysis.
+- **Improved Profiling API**: Added `ENT_get_profile` and `ENT_debug_rule_info` to the core DLL for deep inspection.
+
+### 🛠️ Engineering & Stability
+
+- Refined DLL export macros for consistent cross-platform symbol visibility.
+- Fixed header inclusion order enforcement to prevent build errors.
+- Cleaned up temporary build artifacts and unnecessary repository files.
+
+### 🛡️ Security & Packaging
+
+- Refreshed PyArmor encryption for core modules.
+- Updated documentation with M5 OpenMP and M8 GPU strategy.
 
 ## [1.1.2] - 2026-01-09
 
