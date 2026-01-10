@@ -122,6 +122,34 @@ Python 生态中水力模型处理通常受限于 Pandas 的单线程性能。EP
 
 ---
 
+## 🔁 迁移与集成 (Migration & Integration)
+
+### Q1: 我正在使用 OWA-EPANET 2.3，如何迁移？
+
+EPANET-Turbo 与 OWA-EPANET **100% 兼容**。
+
+- **INP 文件**: 无需任何修改。
+- **API 接口**: 标准函数（如 `ENopen`, `ENsolveH`）的行为完全一致。
+- **性能飞跃**: 要解锁 100 倍以上的加速，请将传统的 Python 循环替换为 Turbo 专有的 **Batch API** (`ENT_set_node_values`)。
+
+### Q2: 我正在使用 WNTR，这是替代品吗？
+
+**它是互补关系，而非替代关系。**
+
+- **WNTR**: 擅长拓扑分析、韧性评估、脆弱性曲线等复杂建模。
+- **Turbo**: 擅长**纯粹的计算爆发力**（大规模、高频次仿真）。
+
+**推荐的混合工作流**:
+
+1. 使用 **WNTR** 构建或修改管网结构。
+2. 通过 `wn.write_inpfile()` 导出临时 INP。
+3. 使用 **EPANET-Turbo** 进行大规模仿真（蒙特卡洛、PDA 等）。
+4. 加载二进制结果进行后续分析。
+
+> 💡 参见示例: `examples/wntr_compatibility.py` (仅本地可见)
+
+---
+
 ## 🔧 部署与安装 (Deployment)
 
 EPANET-Turbo 采用 **"全平台二进制分发"** 模式，用户无需安装 C/C++ 编译器即可直接使用。
