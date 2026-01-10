@@ -8,13 +8,21 @@ __pycache__/
 .vscode/
 .idea/
 
-# Binaries & Artifacts
+# Binaries & Artifacts (Ignore generally, but allow release binaries)
 *.dll
 *.so
 *.pyd
 *.exe
 *.obj
 *.lib
+!epanet_turbo/dll/*.dll
+!epanet_turbo/dll/*.so
+!epanet_turbo/pyarmor_runtime_000000/*.so
+!epanet_turbo/pyarmor_runtime_000000/*.pyd
+
+# Notebooks
+*.ipynb
+
 
 # DEVELOPMENT SOURCE (Local Only - DO NOT COMMIT)
 # -----------------------------------------------
