@@ -1,67 +1,45 @@
-# Byte-compiled / optimized / DLL files
-__pycache__/
-*.py[cod]
-*$py.class
-*.pyo
-
-# Distribution / packaging
+# Ephemeral / Build
 build/
 dist/
 dist_encrypted/
+__pycache__/
 *.egg-info/
-*.egg
-.eggs/
-
-# Virtual environments
 .venv/
-venv/
-ENV/
-
-# IDE
 .vscode/
 .idea/
-*.swp
-*.swo
 
-# OS
-.DS_Store
-Thumbs.db
+# Binaries & Artifacts
+*.dll
+*.so
+*.pyd
+*.exe
+*.obj
+*.lib
 
-# Test outputs
-*.rpt
-*.out
-*.bin
+# DEVELOPMENT SOURCE (Local Only - DO NOT COMMIT)
+# -----------------------------------------------
+src/
+CMakeLists.txt
+build_encrypted.py
+run/
+tools/
+tests/
+examples/
+Example/
+example-networks/
+doc/
+cmake/
 
-# Temp files
+# Public Headers (Keep include/ but ignore junk)
+include/*.bas
+include/*.pas
+include/*.vb
+include/*.cs
+include/*.def
+
+# Misc
 *.tmp
 *.bak
-
-# Internal / Private (Released via PyArmor or Ignored)
-docs/
-build_encrypted.py
-.agent/
-tests/
-test_streaming_out/
-test_streaming_out_small/
-private_src/
-epanet_turbo/epanet2.dll
-_local_test/
-*.zip
-*.obj
-*.exe
-*.i
-*.sln
-*.vcxproj*
-.env
-data/
-
-# Upstream OWA ignores
-/m4
-/stamp-h1
-/config.h
-/config.h.in
-/config.log
-/config.status
-/configure
-/src/epanet2
-/tests/run_tests
+*.log
+.DS_Store
+Thumbs.db
