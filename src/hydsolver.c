@@ -16,6 +16,9 @@
 #include <stdio.h>
 #include <string.h>
 #include <math.h>
+#ifdef _OPENMP
+#include <omp.h>
+#endif
 
 #include "types.h"
 #include "funcs.h"
@@ -409,12 +412,14 @@ void  newlinkflows(Project *pr, Hydbalance *hbal, double *qsum, double *dqsum)
     Slink   *link;
 
     // Initialize net inflows (i.e., demands) at fixed grade nodes
+    #pragma omp parallel for private(n)
     for (n = net->Njuncs + 1; n <= net->Nnodes; n++)
     {
         hyd->NodeDemand[n] = 0.0;
     }
 
     // Examine each link
+    #pragma omp parallel for private(k, link, n1, n2, dh, dq, n)
     for (k = 1; k <= net->Nlinks; k++)
     {
         // Get link and its end nodes
@@ -486,6 +491,7 @@ void newemitterflows(Project *pr, Hydbalance *hbal, double *qsum,
     double  hloss, hgrad, dh, dq;
 
     // Examine each network junction
+    #pragma omp parallel for private(i, hloss, hgrad, dh, dq)
     for (i = 1; i <= net->Njuncs; i++)
     {
         // Skip junction if it does not have an emitter
@@ -533,6 +539,7 @@ void newleakageflows(Project *pr, Hydbalance *hbal, double *qsum,
     int     i;
     double  dq;
 
+    #pragma omp parallel for private(i, dq)
     for (i = 1; i <= net->Njuncs; i++)
     {
         // Update leakage flow at node i
@@ -583,6 +590,7 @@ void newdemandflows(Project *pr, Hydbalance *hbal, double *qsum, double *dqsum)
     n = 1.0 / hyd->Pexp;
 
     // Examine each junction
+    #pragma omp parallel for private(i, hloss, hgrad, dh, dq)
     for (i = 1; i <= net->Njuncs; i++)
     {
         // Skip junctions with no positive demand
@@ -633,6 +641,7 @@ void  checkhydbalance(Project *pr, Hydbalance *hbal)
     hbal->maxheaderror = 0.0;
     hbal->maxheadlink = 1;
     headlosscoeffs(pr);
+    #pragma omp parallel for private(k, link, n1, n2, dh, headloss, headerror)
     for (k = 1; k <= net->Nlinks; k++)
     {
         if (hyd->LinkStatus[k] <= CLOSED) continue;
@@ -713,6 +722,7 @@ int pdaconverged(Project *pr)
     hyd->DemandReduction = 0.0;
        
     // Examine each network junction
+    #pragma omp parallel for private(i, p, q, r)
     for (i = 1; i <= pr->network.Njuncs; i++)
     {
         // Skip nodes whose required demand is non-positive

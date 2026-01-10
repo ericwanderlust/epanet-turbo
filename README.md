@@ -52,13 +52,20 @@ EPANET-Turbo v1.2 实现了从“解算效率”到“工程吞吐”的全面�
 - **实测表现**: 在典型城市级 EPS 模型中，规则评估次数降低 **99%**，`rules_eval_count` 从数万次降至个位数。
 - **深度透视**: 提供 `ENT_get_profile` API，支持对矩阵装配、线性求解、规则评估耗时的纳秒级监控。
 
-#### 4. 冷启动加速 (Cold Start Acceleration) - v1.3 新特性 🚀
+#### 4. 冷启动加速 (Cold Start Acceleration) - v1.3 & v1.4 🚀
 
 引入自动化的模型缓存机制与流式协议标准化：
 
-- **ID Cache**: 自动在此目录生成 `.inp.cache` 文件，缓存网络拓扑与索引。
-  - **实测效果**: 10万节点模型解析耗时从 **2.10s 降至 0.32s (6.6x 加速)**。
-- **Streaming Protocol V1**: 定义了标准的二进制输出协议 (Start Header 512B)，支持元数据与二进制流分离，确保结果文件的长期可读性与兼容性。
+- **ID Cache**: 自动在 INP 同级目录生成 `.inp.cache` 文件，缓存网络拓扑与索引。
+- **实测性能 (10万节点模型)**:
+  - 首次加载 (无缓存): **2.10s**
+  - 二次加载 (有缓存): **0.32s** (**🚀 6.6x 加速**)
+- **Streaming Protocol V2**: v1.4 升级了标准的二进制输出协议，支持元数据与二进制流分离，确保结果文件的长期可读性与兼容性。
+
+#### 5. 统一构建矩阵 (Unified Build Matrix) - v1.4 新特性 🏎️
+
+- **双目标并发**: 一个 CMake 配置同时生成 `epanet2.dll` (Serial) 和 `epanet2_openmp.dll` (Parallel)。
+- **跨平台适配**: 核心代码已适配 Linux (Colab/Ubuntu) 与 macOS，统一了导出宏与符号可见性。
 
 ---
 
@@ -67,9 +74,9 @@ EPANET-Turbo v1.2 实现了从“解算效率”到“工程吞吐”的全面�
 我们将持续在以下维度深挖水力计算的极限：
 
 - **[M3] 冷启动加速 (已完成)**: 实现自动 ID 缓存 (6x 加速) 与 Streaming Protocol V1，支持 40w+ 节点模型的秒级加载。
-- **[M4] 核心对齐**: 同步 OWA-EPANET v2.3.3 最新改进，确保数值计算的一致性与前沿性。
-- **[M5] 线程控制**: 提供多轨 DLL 支持 (Serial/OpenMP)，支持在 Python 端动态切换计算引擎。
-- **[M6] 跨平台**: 实现 Linux (Ubuntu/CentOS) 与 macOS (M1/M2) 的原生支持。
+- **[M4] 核心对齐 (已完成)**: 同步 OWA-EPANET v2.3.3 最新改进，确保数值计算的一致性与前沿性。
+- **[M5] 统一构建 (已完成)**: 实现多轨 DLL 支持 (Serial/OpenMP) 与跨平台 (Linux/macOS) 统一构建矩阵。
+- **[M6] 跨平台增强**: 完善 Linux (Ubuntu/CentOS) 与 macOS (M1/M2) 的原生分发包。
 - **[M7] Rust 加速层**: 利用 Rust 重写 Batch API 与内部调度器，消除 Python - C 桥接的所有残余开销。
 - **[M8] GPU 赋能**: 利用 GPU 处理超大规模场景并行 (Scenario-Ensemble) 与水质后处理张量运算。
 
@@ -193,13 +200,18 @@ Solves memory overflow issues when extracting full results for ultra-large model
   > **"442k nodes × 673 steps, RSS peak 142MB, 352s end-to-end (7-day EPS)"**
 - **Core Logic**: Memmap disk-streaming + Batch Result Extraction (Batch Getter **50.6x** speedup)
 
-#### 3. Intelligent Optimization - v1.2 New Features 🚀
+#### 4. Cold Start Acceleration - v1.3 & v1.4 🚀
 
-Zero-overhead simulation for models with complex rule logic:
+- **ID Cache**: Automatically generates `.inp.cache` to store topology and indices.
+- **Micro-Benchmark (100k nodes)**:
+  - First Load: **2.10s**
+  - Cached Load: **0.32s** (**🚀 6.6x faster**)
+- **Streaming Protocol V2**: Version 1.4 introduces an updated binary protocol for metadata separation and long-term compatibility.
 
-- **Time-only Rules Skip**: Automatically detects time-dependent rules and skips evaluation until the next trigger point.
-- **Performance**: Achieves **99% reduction** in rule evaluation counts for typical city-scale EPS models.
-- **Deep Profiling**: New `ENT_get_profile` API for nanosecond-level monitoring of matrix assembly, linear solving, and rule evaluation.
+#### 5. Unified Build Matrix - v1.4 New Feature 🏎️
+
+- **Dual Targets**: Simultaneous generation of `epanet2.dll` (Serial) and `epanet2_openmp.dll` (Parallel).
+- **Cross-Platform**: Core C implementation now supports Linux (verified via Colab/Ubuntu) and macOS with unified export macros.
 
 ---
 
@@ -210,8 +222,8 @@ The roadmap for pushing the boundaries of hydraulic simulation:
 | Milestone | Description | Version | Status |
 |:----------|:------------|:--------|:-------|
 | M3 | Cache & Output Hardening | v1.3.0 | ✅ Completed |
-| M4 | Upstream Baseline Sync | v1.4.0 | 🔥 In Progress |
-| M5 | Unified Cross-platform Build | v1.5.0 | 📅 Planned |
+| M4 | Upstream Baseline Sync | v1.4.0 | ✅ Completed |
+| M5 | Unified Build Matrix | v1.4.0 | ✅ Completed |
 | M6 | Linux/macOS Official Support | v2.0.0 | 📅 Planned |
 | M7 | Rust Acceleration Layer | v2.1+ | 📅 Planned |
 | M8 | GPU Empowerment | v2.1+ | 📅 Planned |

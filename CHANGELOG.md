@@ -2,7 +2,21 @@
 
 All notable changes to this project will be documented in this file.
 
-## [1.3.0] - 2026-01-09 - Cache & Output Hardening
+## [1.4.0] - 2026-01-10 - Unified Build Matrix & Upstream Sync
+
+### 🏎️ Unified Build Matrix (M5)
+
+- **Dual Target Generation**: Simultaneously builds `epanet2.dll` (Serial) and `epanet2_openmp.dll` (OpenMP) from a single CMake configuration.
+- **Cross-Platform Readiness**: Enhanced `CMakeLists.txt` for Linux/macOS compatibility. Verified on Google Colab (Linux).
+- **API Extensions**:
+  - `ENT_engine_id()`: Returns "Turbo-Serial" or "Turbo-OpenMP" based on the loaded binary.
+  - `ENT_set_num_threads()`: Safe thread control across Serial/OpenMP builds.
+- **Export Standardization**: Introduced `epanet_turbo_export.h` using `EPNT_API` macros for reliable symbol visibility.
+
+### 🔄 Upstream Baseline Sync (M4)
+
+- **OWA-EPANET v2.3.3 Integration**: Synchronized core computation logic with the latest upstream improvements.
+- **Fixed Linker Hazards**: Resolved missing symbols (`flowbalance.c`, etc.) in the unified build process.
 
 ### ⚡ Performance & Cold Start (M3)
 

@@ -15,6 +15,9 @@
 #include <stdio.h>
 #include <string.h>
 #include <math.h>
+#ifdef _OPENMP
+#include <omp.h>
+#endif
 
 #include "types.h"
 #include "funcs.h"
@@ -496,6 +499,7 @@ void  demands(Project *pr)
 
     // Update demand at each node according to its assigned pattern
     hyd->Dsystem = 0.0;          // System-wide demand
+    #pragma omp parallel for private(i, sum, demand, j, k, djunc)
     for (i = 1; i <= net->Njuncs; i++)
     {
         sum = 0.0;
@@ -517,6 +521,7 @@ void  demands(Project *pr)
     }
 
     // Update head at fixed grade nodes with time patterns
+    #pragma omp parallel for private(n, j, k, i)
     for (n = 1; n <= net->Ntanks; n++)
     {
         Stank *tank = &net->Tank[n];
@@ -533,6 +538,7 @@ void  demands(Project *pr)
     }
 
     // Update status of pumps with utilization patterns
+    #pragma omp parallel for private(n, j, i, k)
     for (n = 1; n <= net->Npumps; n++)
     {
         Spump *pump = &net->Pump[n];
@@ -1059,6 +1065,7 @@ void  tanklevels(Project *pr, long tstep)
     int    i, n;
     double dv;
 
+    #pragma omp parallel for private(i, n, dv)
     for (i = 1; i <= net->Ntanks; i++)
     {
         Stank *tank = &net->Tank[i];

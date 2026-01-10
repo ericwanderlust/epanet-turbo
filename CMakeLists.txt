@@ -1,103 +1,98 @@
-# CMakeLists.txt - CMake configuration file for EPANET 2.3
-#
-# CMake is a cross-platform build tool. CMake generates platform native
-# build systems that can be used with your compiler of choice. CMake uses a
-# generator concept to represent different build tooling. CMake automatically
-# detects the platform it is running on and generates the appropriate makefiles
-# for the platform default compiler. Different generators can also be specified.
-#
-# Note: CMake requires that your platform build system and compiler are
-# properly installed. Build using Visual Studio requires msbuild shell.
-#
-# Build Options:
-#   BUILD_TESTS = ON/OFF
-#   BUILD_PY_LIB = ON/OFF
-#
-# Generic Invocation:
-#   cmake -E make_directory buildprod
-#   cd build
-#   cmake -G GENERATOR -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTS=ON ..
-#   cmake --build . --target SOME_TARGET --config Release
-#
-# More information:
-#   cmake --help
-#
-#   CMake is available at https://cmake.org/download/
-#
+cmake_minimum_required(VERSION 3.20)
+project(EPANET C)
 
-cmake_minimum_required (VERSION 3.8.0)
-
-project(EPANET)
-
-# Append local dir to module search path
-list(APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
-
-option(BUILD_SHARED_LIBS "Build using shared libraries" ON)
+option(BUILD_SERIAL "Build serial EPANET engine (no OpenMP)" ON)
+option(ENABLE_OPENMP "Build OpenMP EPANET engine" ON)
 option(BUILD_TESTS "Build tests (requires Boost)" OFF)
-#option(BUILD_PY_LIB "Build library for Python wrapper" OFF)
-option(BUILD_COVERAGE "Build library for coverage" OFF)
 
-#IF (NOT BUILD_PY_LIB)
-  add_subdirectory(run)
-#ENDIF (NOT BUILD_PY_LIB)
-add_subdirectory(src/outfile)
+# Common Sources
+set(EPANET_SOURCES
+    src/epanet2.c
+    src/epanet.c
+    src/hydraul.c
+    src/hydsolver.c
+    src/hydcoeffs.c
+    src/hydstatus.c
+    src/inpfile.c
+    src/input1.c
+    src/input2.c
+    src/input3.c
+    src/leakage.c
+    src/output.c
+    src/project.c
+    src/quality.c
+    src/qualreact.c
+    src/qualroute.c
+    src/report.c
+    src/rules.c
+    src/smatrix.c
+    src/validate.c
+    src/epanet_turbo.c
+    src/epanet_bulk.c
+    src/mempool.c
+    src/flowbalance.c
+    src/genmmd.c
+    src/hash.c
+)
 
-IF (BUILD_TESTS)
-    #Prep ourselves for compiling with boost
-    IF(WIN32)
-        set(Boost_USE_STATIC_LIBS       ON)
-    ELSE(TRUE)
-        set(Boost_USE_STATIC_LIBS       OFF)
-        add_definitions(-DBOOST_ALL_DYN_LINK)
-    ENDIF(WIN32)
+# Configuration Helper
+function(configure_common target_name)
+    target_include_directories(${target_name} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
+    target_compile_features(${target_name} PRIVATE c_std_11)
+    set_target_properties(${target_name} PROPERTIES POSITION_INDEPENDENT_CODE ON)
+    
+    if(MSVC)
+        target_compile_definitions(${target_name} PRIVATE _CRT_SECURE_NO_WARNINGS _CRT_SECURE_NO_DEPRECATE)
+        target_compile_options(${target_name} PRIVATE /fp:precise)
+    else()
+        target_compile_options(${target_name} PRIVATE -Wall -Wextra -Wno-unused-parameter)
+    endif()
+    
+    # Export Definition (dllexport handled by epanet_turbo_export.h or epanet2.h macros usually, 
+    # but we can add standard defs here if needed)
+endfunction()
 
-    find_package(Boost COMPONENTS unit_test_framework system thread filesystem)
-    include_directories (${Boost_INCLUDE_DIRS})
+# 1. Serial Target
+if(BUILD_SERIAL)
+    add_library(epanet2 SHARED ${EPANET_SOURCES})
+    configure_common(epanet2)
+    target_compile_definitions(epanet2 PRIVATE EPNT_SERIAL=1 EPANET_EXPORTS)
+    
+    if(MSVC)
+         # Existing def for consistent exports if headers depend on it?
+         # epanet2.c often relies on declspec.
+    endif()
+    
+    set_target_properties(epanet2 PROPERTIES OUTPUT_NAME "epanet2")
+    install(TARGETS epanet2 DESTINATION .)
+endif()
 
+# 2. OpenMP Target
+if(ENABLE_OPENMP)
+    find_package(OpenMP)
+    if(OpenMP_C_FOUND)
+        add_library(epanet2_openmp SHARED ${EPANET_SOURCES})
+        configure_common(epanet2_openmp)
+        target_link_libraries(epanet2_openmp PRIVATE OpenMP::OpenMP_C)
+        target_compile_definitions(epanet2_openmp PRIVATE EPNT_OPENMP=1 epanet2_EXPORTS EPANET_EXPORTS)
+        
+        # Ensure distinct name
+        set_target_properties(epanet2_openmp PROPERTIES OUTPUT_NAME "epanet2_openmp")
+        install(TARGETS epanet2_openmp DESTINATION .)
+    else()
+        message(WARNING "OpenMP not found. epanet2_openmp will not be built.")
+    endif()
+endif()
+
+# Install Headers
+install(FILES include/epanet2.h DESTINATION include)
+install(FILES include/epanet2_2.h DESTINATION include)
+install(FILES include/epanet2_enums.h DESTINATION include)
+install(FILES include/epanet_turbo.h DESTINATION include)
+install(FILES include/epanet_bulk.h DESTINATION include)
+
+# Tests (Optional)
+if(BUILD_TESTS)
     enable_testing()
     add_subdirectory(tests)
-    add_subdirectory(tests/outfile)
-    add_subdirectory(tests/util)
-ENDIF (BUILD_TESTS)
-
-# Sets the output directory for executables and libraries.
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
-set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
-set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
-
-# Sets the position independent code property for all targets
-SET(CMAKE_POSITION_INDEPENDENT_CODE ON)
-
-IF (APPLE)
-  set(INSTALL_NAME_DIR @executable_path/../lib)
-  set(CMAKE_MACOSX_RPATH 1)
-ENDIF (APPLE)
-
-IF (MSVC)
-  set(CMAKE_C_FLAGS_RELEASE "/GL")
-  add_definitions(-D_CRT_SECURE_NO_DEPRECATE -MT)
-ENDIF (MSVC)
-
-# configure file groups
-file(GLOB EPANET_SOURCES RELATIVE ${PROJECT_SOURCE_DIR} src/*.c src/util/*.c)
-file(GLOB EPANET_LIB_ALL RELATIVE ${PROJECT_SOURCE_DIR} src/* src/util/*)
-source_group("Library" FILES ${EPANET_LIB_ALL})
-
-# the shared library
-IF(MSVC AND "${CMAKE_VS_PLATFORM_NAME}" MATCHES "(Win32)")
-  message("   ************************************")
-  message("   Configuring with epanet2.def mapping")
-  message("   ************************************")
-  add_library(epanet2 SHARED ${EPANET_LIB_ALL} ${PROJECT_SOURCE_DIR}/include/epanet2.def)
-  set_source_files_properties(${PROJECT_SOURCE_DIR}/include/epanet2.def PROPERTIES_HEADER_FILE_ONLY TRUE)
-ELSE(TRUE)
-  add_library(epanet2 ${EPANET_LIB_ALL})
-ENDIF(MSVC AND "${CMAKE_VS_PLATFORM_NAME}" MATCHES "(Win32)")
-
-target_include_directories(epanet2 PUBLIC ${PROJECT_SOURCE_DIR}/include)
-
-install(TARGETS epanet2 DESTINATION .)
-install(TARGETS runepanet DESTINATION .)
-install(FILES ./include/epanet2.h DESTINATION .)
-install(FILES ./include/epanet2_2.h DESTINATION .)
-install(FILES ./include/epanet2_enums.h DESTINATION .)
+endif()
