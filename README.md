@@ -136,16 +136,14 @@ EPANET-Turbo 采用 **"全平台二进制分发"** 模式，用户无需安装 C
 
 ### 2. 安装步骤
 
-#### 方式 A: 安装包安装 (推荐 / Recommended)
-
-这是最稳健的方式。请前往 [Github Releases](https://github.com/ericwanderlust/epanet-turbo/releases) 页面下载最新的 `.whl` 文件。
+请前往 [Github Releases](https://github.com/ericwanderlust/epanet-turbo/releases) 页面下载最新的 `.whl` 文件。
 
 ```bash
 # 假设您下载的文件名为 epanet_turbo-2.0.0-py3-none-any.whl
 pip install epanet_turbo-2.0.0-py3-none-any.whl
 ```
 
-#### 方式 B: 验证安装
+### 3. 验证安装
 
 安装完成后，在终端运行 Python 进行测试：
 
@@ -156,7 +154,7 @@ print(f"Version: {epanet_turbo.__version__}")
 # Linux 若报错 "OSError: libepanet2.so not found"，请检查 LD_LIBRARY_PATH
 ```
 
-### 3. Linux 部署特别说明
+### 4. Linux 部署特别说明
 
 本项目已内置 `libepanet2.so` (Ubuntu 22.04 编译)。
 
@@ -331,15 +329,13 @@ EPANET-Turbo uses a **Binary Distribution** model. No C/C++ compiler is needed.
 
 ### 2. Installation steps
 
-#### Option A: Install via Wheel (Recommended)
-
 Go to [Github Releases](https://github.com/ericwanderlust/epanet-turbo/releases) and download the latest `.whl` package.
 
 ```bash
 pip install epanet_turbo-2.0.0-py3-none-any.whl
 ```
 
-#### Option B: Verify Installation
+### 3. Verify Installation
 
 ```python
 import epanet_turbo
@@ -348,7 +344,7 @@ print(f"Version: {epanet_turbo.__version__}")
 # Linux: If "OSError: libepanet2.so not found", check LD_LIBRARY_PATH
 ```
 
-### 3. Linux Note
+### 4. Linux Note
 
 Includes pre-compiled `libepanet2.so` (Ubuntu 22.04). Most modern distros work out-of-the-box. Legacy distros (CentOS 7) may require manual compilation of OWA-EPANET.
 
