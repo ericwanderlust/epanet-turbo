@@ -136,17 +136,13 @@ EPANET-Turbo 采用 **"全平台二进制分发"** 模式，用户无需安装 C
 
 ### 2. 安装步骤
 
-#### 方式 A: 源码安装 (推荐)
+#### 方式 A: 安装包安装 (推荐 / Recommended)
 
-如果您下载了本仓库源码：
+这是最稳健的方式。请前往 [Github Releases](https://github.com/ericwanderlust/epanet-turbo/releases) 页面下载最新的 `.whl` 文件。
 
 ```bash
-# 1. 进入项目目录
-cd epanet-turbo
-
-# 2. 安装依赖并部署
-# 💡 中国大陆用户推荐使用清华镜像加速下载依赖:
-pip install . -i https://pypi.tuna.tsinghua.edu.cn/simple
+# 假设您下载的文件名为 epanet_turbo-2.0.0-py3-none-any.whl
+pip install epanet_turbo-2.0.0-py3-none-any.whl
 ```
 
 #### 方式 B: 验证安装
@@ -201,7 +197,7 @@ print("Simulation complete.")
 
 ## 🛡️ 声明与协议
 
-- **遥测 (Telemetry)**: 收集匿名基础信息（OS、Python版本）以优化兼容性。设置 `EPANET_TURBO_NO_TELEMETRY=1` 可禁用。
+- **遥测 (Telemetry)**: 收集基础系统指纹以进行许可证验证与兼容性分析。
 - **知识产权**: 核心算法模块采用 PyArmor 加密保护。
 - **免责声明**: 本软件按“原样”提供，开发者不对使用后果承担法律责任。
 
@@ -335,11 +331,12 @@ EPANET-Turbo uses a **Binary Distribution** model. No C/C++ compiler is needed.
 
 ### 2. Installation steps
 
-#### Option A: Install from Source (Reference)
+#### Option A: Install via Wheel (Recommended)
+
+Go to [Github Releases](https://github.com/ericwanderlust/epanet-turbo/releases) and download the latest `.whl` package.
 
 ```bash
-cd epanet-turbo
-pip install .
+pip install epanet_turbo-2.0.0-py3-none-any.whl
 ```
 
 #### Option B: Verify Installation
@@ -359,7 +356,7 @@ Includes pre-compiled `libepanet2.so` (Ubuntu 22.04). Most modern distros work o
 
 ## 🛡️ Telemetry & License
 
-- **Telemetry**: Collects basic anonymous usage data (OS/Python version). Set `EPANET_TURBO_NO_TELEMETRY=1` to disable.
+- **Telemetry**: Collects basic system identifiers for license verification and compatibility analysis.
 - **IP Protection**: Core modules are encrypted via PyArmor.
 - **Disclaimer**: Provided "AS IS" without warranty.
 
