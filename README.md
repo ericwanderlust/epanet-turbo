@@ -44,6 +44,16 @@ v2.0 版本标志着 **M6 (跨平台)** 里程碑的完成，正式实现了 Win
 | **M5** | v1.4.0 | **Unified Matrix**: 升级 CMake 构建系统，支持单次编译同时产出 Serial 与 OpenMP 双版本内核。 | ✅ 完成 |
 | **M6** | v2.0.0 | **Cross-Platform**: 攻克 Linux 编译适配与 PyArmor 跨平台运行时，正式发布 Linux 原生支持与 Protocol V2 格式。 | ✅ 完成 |
 
+### 🔮 未来蓝图 (Future Blueprint)
+
+我们不会止步于此。2026 年接下来的计划：
+
+| 里程碑 | 预估版本 | 核心目标 | 状态 |
+|:-------|:-----|:---------|:-----|
+| **M7** | v2.2.0 | **Rust Acceleration Layer**: **底层架构重写**。利用 Rust (PyO3) 彻底重写仿真调度器与内存管理模块，替换现有的 CTypes 胶水层，实现纳秒级互操作与零拷贝安全特性。 | 🏗️ 筹备中 |
+| **M8** | v3.0.0 | **GPU Empowerment (Outer-loop)**: 针对外层循环（校准/优化/不确定性分析）的 GPU 原生加速。将数万次串行仿真转化为 GPU 上的并行 Tensor 运算。 | 📅 规划中 |
+| **M9** | v4.0.0 | **AI Surrogate**: 内置图神经网络 (GNN) 代理模型精度校准，实现“预测-仿真”混合双驱。 | 📅 规划中 |
+
 ---
 
 ## ⚡ 技术深度解析 (Technical Deep Dive)
@@ -91,18 +101,73 @@ Python 生态中水力模型处理通常受限于 Pandas 的单线程性能。EP
 
 ---
 
-## 🔧 安装与使用
+---
 
-### 1. 自动安装
+## 📂 项目结构 (Project Structure)
+
+| 目录/文件 | 说明 |
+| :--- | :--- |
+| **`epanet_turbo/`** | **Python 包核心** (Encrypted) |
+| ├── `dll/` | **预编译内核**: 包含 `epanet2.dll` (Win), `libepanet2.so` (Linux) |
+| ├── `engine.py` | 底层驱动: 负责加载 DLL 并通过 CTypes 调用 C 函数 |
+| ├── `parser.py` | **Polars 解析器**: 极速读取 INP 文件 |
+| └── `streaming.py` | 流式输出器: 实现 Protocol V2 二进制写出 |
+| **`include/`** | **C 头文件**: 包含 `epanet2.h` 等开发所需的 API 定义 |
+| **`examples/`** | **开源示例 (Open Source)**: 供用户学习与复制 |
+| ├── `quickstart.py` | 基础功能演示 |
+| ├── `turbo_adapter.py` | **WNTR 适配器** (可直接复制到您项目中使用) |
+| ├── `demo_adapter.py` | WNTR 迁移演示脚本 |
+| └── `Net3.inp` | 示例管网文件 |
+| `pyproject.toml` | 项目配置文件 (依赖管理、元数据) |
+
+---
+
+## 🔧 部署与安装 (Deployment)
+
+EPANET-Turbo 采用 **"全平台二进制分发"** 模式，用户无需安装 C/C++ 编译器即可直接使用。
+
+### 1. 环境要求
+
+- **OS**: Windows 10/11 (x64) 或 Linux (Ubuntu 20.04+, RHEL 8+, glibc 2.29+)
+- **Python**: 3.10, 3.11, 3.12 (推荐 3.12 以获得最佳性能)
+- **核心依赖**:
+  - `polars >= 0.20.0` (极速数据处理)
+  - `numpy >= 1.20.0` (数值计算)
+
+### 2. 安装步骤
+
+#### 方式 A: 源码安装 (推荐)
+
+如果您下载了本仓库源码：
 
 ```bash
-pip install .
+# 1. 进入项目目录
+cd epanet-turbo
+
+# 2. 安装依赖并部署
+# 💡 中国大陆用户推荐使用清华镜像加速下载依赖:
+pip install . -i https://pypi.tuna.tsinghua.edu.cn/simple
 ```
 
-- **Windows**: 自动部署内置的高性能 DLL (`epanet2.dll`, `epanet2_openmp.dll`)。
-- **Linux**: pip 会调用 CMake 自动编译 `libepanet2.so` (需安装 `build-essential` 和 `cmake`)。
+#### 方式 B: 验证安装
 
-### 2. 快速使用
+安装完成后，在终端运行 Python 进行测试：
+
+```python
+import epanet_turbo
+print(f"Version: {epanet_turbo.__version__}")
+# Windows 应输出: Version: 2.0.0
+# Linux 若报错 "OSError: libepanet2.so not found"，请检查 LD_LIBRARY_PATH
+```
+
+### 3. Linux 部署特别说明
+
+本项目已内置 `libepanet2.so` (Ubuntu 22.04 编译)。
+
+- **通常情况**: `pip install .` 后会自动识别内置 `.so`，开箱即用。
+- **特殊情况**: 如果您的 Linux 系统极老 (如 CentOS 7)，可能会提示 `GLIBC` 版本错误。此时您需要自行编译 OWA-EPANET 并替换 `epanet_turbo/dll/` 下的文件。
+
+---
 
 ```python
 from epanet_turbo import InpParser, simulate
@@ -144,6 +209,7 @@ print("Simulation complete.")
 
 ### 🤝 致谢
 
+- **Lee Yau-Wang 皝神**: 感谢大佬提供的核心思路与架构指导！Orz
 - **OWA-EPANET 社区**: 感谢开源社区维护的 EPANET 2.3 基线。
 - **WNTR 团队**: 感谢 WNTR 提供的优秀 Python 接口设计灵感。
 
@@ -172,6 +238,14 @@ v2.0 marks the completion of the **M6 Milestone**, delivering a truly **Unified 
 | **M4** | v1.2.0 | **Open-Once**: Memory-resident handles eliminated 90% of initialization overhead for rolling predictions. | ✅ Done |
 | **M5** | v1.4.0 | **Unified Matrix**: Single CMake system generating both Serial and OpenMP binaries. | ✅ Done |
 | **M6** | v2.0.0 | **Cross-Platform**: Achieved native Linux support (`libepanet2.so`) and Protocol V2 format. | ✅ Done |
+
+### 🔮 Future Blueprint
+
+| Milestone | Target | Core Objective | Status |
+|:----------|:-------|:---------------|:-------|
+| **M7** | v2.2.0 | **Rust Acceleration Layer**: **Underlying Architecture Rewrite**. Completely rewriting the simulation scheduler and memory management in Rust (PyO3) to replace CTypes, achieving nanosecond interoperability. | 🏗️ Planned |
+| **M8** | v3.0.0 | **GPU Empowerment (Outer-loop)**: Accelerating the "Outer-loop" (Calibration, Optimization) directly on GPUs. Transforming 10k serial runs into parallel tensor operations. | 📅 Future |
+| **M9** | v4.0.0 | **AI Surrogate**: Built-in Graph Neural Network (GNN) calibration and hybrid "Prediction-Simulation" drivers. | 📅 Future |
 
 ---
 
@@ -207,16 +281,95 @@ The **Batch API** allows injecting millions of parameter changes (e.g., node dem
 
 ---
 
-## 🔧 Installation
+## 📂 Project Structure
+
+| Path | Description |
+| :--- | :--- |
+| **`epanet_turbo/`** | **Core Package** (Encrypted) |
+| ├── `dll/` | **Kernels**: Pre-compiled `epanet2.dll` (Win) & `libepanet2.so` (Linux) |
+| ├── `engine.py` | Driver: Handles DLL loading and CTypes mapping |
+| ├── `parser.py` | **Polars Parser**: Ultra-fast INP reader |
+| └── `streaming.py` | Streaming Output: Protocol V2 implementation |
+| **`include/`** | **Headers**: Public C API definitions (`epanet2.h`) |
+| `pyproject.toml` | Config: Dependencies & Metadata |
+
+---
+
+## 🔁 Migration & Integration
+
+### Q1: I use OWA-EPANET 2.3. How to migrate?
+
+EPANET-Turbo is **100% compatible** with OWA-EPANET.
+
+- **INP Files**: No changes needed.
+- **API**: Standard functions (`ENopen`, `ENsolveH`) behave identically.
+- **Performance**: To unlock 100x speedups, replace Python loops with Turbo's **Batch API** (`ENT_set_node_values`).
+
+### Q2: I use WNTR. Is this a replacement?
+
+**It is Complementary, not a Replacement.**
+
+- **WNTR**: Best for Topology Analysis, Resilience, Fragility Curves.
+- **Turbo**: Best for **Pure Computational Power**.
+
+**Recommended Hybrid Workflow**:
+
+1. Use **WNTR** to build/modify network structure.
+2. Export temporary INP via `wn.write_inpfile()`.
+3. Use **EPANET-Turbo** for massive simulations (Monte-Carlo, PDA).
+4. Load binary results for analysis.
+
+> 💡 See example: `examples/wntr_compatibility.py` (Local only)
+
+---
+
+## 🔧 Deployment & Installation
+
+EPANET-Turbo uses a **Binary Distribution** model. No C/C++ compiler is needed.
+
+### 1. Requirements
+
+- **OS**: Windows 10/11 (x64) or Linux (Ubuntu 20.04+, RHEL 8+, glibc 2.29+)
+- **Python**: 3.10, 3.11, 3.12 (Recommended: 3.12)
+- **Dependencies**: `polars >= 0.20.0`, `numpy >= 1.20.0`
+
+### 2. Installation steps
+
+#### Option A: Install from Source (Reference)
 
 ```bash
+cd epanet-turbo
 pip install .
 ```
 
-* **Windows**: Installs pre-compiled optimized DLLs.
-- **Linux**: Automatically compiles `libepanet2.so` from source (requires `cmake`, `gcc`).
+#### Option B: Verify Installation
+
+```python
+import epanet_turbo
+print(f"Version: {epanet_turbo.__version__}")
+# Windows: Should print Version: 2.0.0
+# Linux: If "OSError: libepanet2.so not found", check LD_LIBRARY_PATH
+```
+
+### 3. Linux Note
+
+Includes pre-compiled `libepanet2.so` (Ubuntu 22.04). Most modern distros work out-of-the-box. Legacy distros (CentOS 7) may require manual compilation of OWA-EPANET.
 
 ---
+
+## 🛡️ Telemetry & License
+
+- **Telemetry**: Collects basic anonymous usage data (OS/Python version). Set `EPANET_TURBO_NO_TELEMETRY=1` to disable.
+- **IP Protection**: Core modules are encrypted via PyArmor.
+- **Disclaimer**: Provided "AS IS" without warranty.
+
+---
+
+### 🤝 Acknowledgments
+
+- **Lee Yau-Wang 皝神**: Special thanks for the core architecture and mentorship! Orz
+- **OWA-EPANET Community**: For maintaining the robust EPANET 2.3 baseline.
+- **WNTR Team**: For the inspiration on Pythonic hydraulic interfaces.
 
 <div align="center">
 

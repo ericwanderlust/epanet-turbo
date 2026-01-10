@@ -7,28 +7,37 @@ __pycache__/
 .venv/
 .vscode/
 .idea/
+test_streaming_out/
+test_streaming_out_small/
 
-# Binaries & Artifacts
+# Binaries & Artifacts (Ignore generally, but allow release binaries)
 *.dll
 *.so
 *.pyd
 *.exe
 *.obj
 *.lib
+!epanet_turbo/dll/*.dll
+!epanet_turbo/dll/*.so
+!epanet_turbo/pyarmor_runtime_000000/*.so
+!epanet_turbo/pyarmor_runtime_000000/*.pyd
+
+# Notebooks
+*.ipynb
+
 
 # DEVELOPMENT SOURCE (Local Only - DO NOT COMMIT)
 # -----------------------------------------------
 src/
 CMakeLists.txt
 build_encrypted.py
-run/
-tools/
 tests/
-examples/
-Example/
-example-networks/
 doc/
 cmake/
+examples/
+tools/
+.agent/
+
 
 # Public Headers (Keep include/ but ignore junk)
 include/*.bas
@@ -41,5 +50,6 @@ include/*.def
 *.tmp
 *.bak
 *.log
+test_protocol_v2.out
 .DS_Store
 Thumbs.db

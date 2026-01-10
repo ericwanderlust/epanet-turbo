@@ -90,7 +90,34 @@ EPANET-Turbo follows an **"Open Core, Protected Logic"** philosophy.
 2. **Encrypt & Compile**: Run `python build_encrypted.py` (internal tool).
     * Compiles C code to DLLs/SOs.
     * Obfuscates Python code using PyArmor.
-3. **Distribute**: The public repository contains only:
+
+### Deployment & Directory Logic (部署详解)
+
+The project structure is designed to be self-contained within the `epanet_turbo` package directory.
+
+#### 1. Binary Placement (`dll/`)
+
+Since we removed the source code (`src/`) from the public repository, the build system relies entirely on pre-compiled binaries located in `epanet_turbo/dll/`.
+
+* **Windows**:
+  * `epanet2.dll` (Serial)
+  * `epanet2_openmp.dll` (OpenMP, requires `vcomp140.dll` usually present on Windows)
+* **Linux**:
+  * `libepanet2.so` (Serial)
+  * `libepanet2_openmp.so` (OpenMP, requires `libomp`)
+
+> **Critical**: When `pip install .` is run, `setup.py` / `pyproject.toml` simply copies these files into the python `site-packages` directory. There is NO compilation step on the user's machine.
+
+#### 2. Engine Loading Logic (`engine.py`)
+
+The `epanet_turbo.engine` module automatically detects the operating system and attempts to load the **OpenMP** version first.
+
+* **If OpenMP load fails** (e.g., missing system libraries), it falls back to the **Serial** version and emits a warning.
+* **Linux Path**: It looks for `.so` files relative to `os.path.dirname(__file__) + '/dll'`.
+
+---
+
+1. **Distribute**: The public repository contains only:
     * `epanet_turbo/` (Encrypted Python + Pre-compiled DLLs).
     * `include/` (Public headers).
 
