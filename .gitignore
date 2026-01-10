@@ -1,0 +1,67 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+*.pyo
+
+# Distribution / packaging
+build/
+dist/
+dist_encrypted/
+*.egg-info/
+*.egg
+.eggs/
+
+# Virtual environments
+.venv/
+venv/
+ENV/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Test outputs
+*.rpt
+*.out
+*.bin
+
+# Temp files
+*.tmp
+*.bak
+
+# Internal / Private (Released via PyArmor or Ignored)
+docs/
+build_encrypted.py
+.agent/
+tests/
+test_streaming_out/
+test_streaming_out_small/
+private_src/
+epanet_turbo/epanet2.dll
+_local_test/
+*.zip
+*.obj
+*.exe
+*.i
+*.sln
+*.vcxproj*
+.env
+data/
+
+# Upstream OWA ignores
+/m4
+/stamp-h1
+/config.h
+/config.h.in
+/config.log
+/config.status
+/configure
+/src/epanet2
+/tests/run_tests
