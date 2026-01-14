@@ -141,6 +141,17 @@ def main():
             except Exception as e:
                 print(f"❌ Failed to create environment: {e}")
                 print("⚠️  Proceeding in current environment. / 将在当前环境中继续。")
+    
+    if not in_venv and not is_relaunched:
+        print("\n" + "!"*60)
+        print("⚠️  WARNING: Installing to GLOBAL/EXISTING Environment")
+        print("   You chose NOT to create an isolated virtual environment.")
+        print("   This might pollute your system Python or conflict with other packages.")
+        print("⚠️  警告: 即将安装到 全局/现有 环境")
+        print("   您选择了不创建隔离的虚拟环境。")
+        print("   这可能会污染您的系统 Python 或与其他包发生冲突。")
+        print("!"*60 + "\n")
+        # Optional: Add a pause or confirmation here if desired, but user already said "No" to venv.
 
     # --- Step 1: Network Configuration (Mirror) ---
     print("\n" + "-"*40)

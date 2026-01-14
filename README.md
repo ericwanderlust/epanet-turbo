@@ -153,6 +153,20 @@ EPANET-Turbo 与 OWA-EPANET **100% 兼容**。
 
 ---
 
+## 📚 Documentation (文档)
+
+- **[Developer Guide / 开发者指南](DEVELOPER_GUIDE.md)**:
+  - Architecture design, directory structure, and compilation guide.
+  - 架构设计、目录结构与编译指南。
+- **[Output Format / 输出格式](OUTPUT_FORMAT.md)**:
+  - Detailed explanation of the Protocol V2 binary output format.
+  - Protocol V2 二进制输出格式的详细说明。
+- **[Release Notes / 版本说明](RELEASE_NOTES_v2.0.md)**:
+  - Change log and new features for v2.0.0.
+  - v2.0.0 版本的更新日志与新特性。
+
+---
+
 ## 🔧 部署与安装 (Deployment)
 
 EPANET-Turbo 采用 **"全平台二进制分发"** 模式，用户无需安装 C/C++ 编译器即可直接使用。
