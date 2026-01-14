@@ -27,8 +27,6 @@ v2.0 版本标志着 **M6 (跨平台)** 里程碑的完成，正式实现了 Win
 
 - **速度**: 模拟速度提升 **5-10倍** (CPU并行)，数据处理速度提升 **50-100倍** (Polars)。
 - **规模**: 轻松承载 **50万节点** 级模型，内存占用通过流式技术控制在常数级 (150MB)。
-- **Easy**: 100% compatible with standard INP files, Python API is intuitive, WNTR drop-in replacement.
-- **Smart**: Automatically adapts to **ARM/Rosetta** (Mac Parallels) environments; built-in **Self-Healing** wrapper fixes dependency corruptions automatically.
 - **易用**: 100% 兼容标准 INP 文件，Python API 设计简洁直观，无痛替代 WNTR。
 - **智能**: 自动识别并适配 **ARM/Rosetta** (Mac Parallels) 环境；内置**自愈 (Self-Healing)** 机制，自动修复依赖损坏。
 
@@ -263,6 +261,13 @@ print("Simulation complete.")
 **EPANET-Turbo** is a high-performance hydraulic simulation engine tailored for **Ultra-Large Scale (100k-1M nodes)** water distribution networks. Built upon the **OWA-EPANET 2.3** kernel, it shatters performance bottlenecks through **OpenMP Parallelism**, **Polars Data Engine**, and **Batch APIs**.
 
 v2.0 marks the completion of the **M6 Milestone**, delivering a truly **Unified Cross-Platform Experience** on both Windows and Linux.
+
+### 🚀 Core Values
+
+- **Speed**: **5-10x** faster simulation (OpenMP), **50-100x** faster pre/post-processing (Polars).
+- **Scale**: Easily handles **500k+ node** models, keeping memory usage constant (150MB) via streaming.
+- **Easy**: 100% compatible with standard INP files, intuitive Python API, drop-in replacement for WNTR.
+- **Smart**: Automatically adapts to **ARM/Rosetta** (Mac Parallels); built-in **Self-Healing** mechanism automatically fixes dependency corruption.
 
 ---
 
