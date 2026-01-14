@@ -59,6 +59,7 @@ include/*.def
 test_protocol_v2.out
 .DS_Store
 # Release Artifacts
+Releases/
 EPANET-Turbo_*_Release/
 EPANET-Turbo_*_Release.zip
 
