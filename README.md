@@ -27,7 +27,10 @@ v2.0 版本标志着 **M6 (跨平台)** 里程碑的完成，正式实现了 Win
 
 - **速度**: 模拟速度提升 **5-10倍** (CPU并行)，数据处理速度提升 **50-100倍** (Polars)。
 - **规模**: 轻松承载 **50万节点** 级模型，内存占用通过流式技术控制在常数级 (150MB)。
+- **Easy**: 100% compatible with standard INP files, Python API is intuitive, WNTR drop-in replacement.
+- **Smart**: Automatically adapts to **ARM/Rosetta** (Mac Parallels) environments; built-in **Self-Healing** wrapper fixes dependency corruptions automatically.
 - **易用**: 100% 兼容标准 INP 文件，Python API 设计简洁直观，无痛替代 WNTR。
+- **智能**: 自动识别并适配 **ARM/Rosetta** (Mac Parallels) 环境；内置**自愈 (Self-Healing)** 机制，自动修复依赖损坏。
 
 ---
 
@@ -162,24 +165,23 @@ EPANET-Turbo 采用 **"全平台二进制分发"** 模式，用户无需安装 C
   - `polars >= 0.20.0` (极速数据处理)
   - `numpy >= 1.20.0` (数值计算)
 
-### 2. 安装步骤
+### 2. 安装步骤 (Installation)
 
-请前往 [Github Releases](https://github.com/ericwanderlust/epanet-turbo/releases) 页面下载最新的 `.whl` 文件。
+前往 [Github Releases](https://github.com/ericwanderlust/epanet-turbo/releases) 页面下载最新的 `.whl` 文件。
 
 ```bash
-# 假设您下载的文件名为 epanet_turbo-2.0.0-py3-none-any.whl
+# 安装下载的 Wheel 包
 pip install epanet_turbo-2.0.0-py3-none-any.whl
 ```
 
-### 3. 验证安装
+### 3. 验证安装 (Verification)
 
 安装完成后，在终端运行 Python 进行测试：
 
 ```python
 import epanet_turbo
 print(f"Version: {epanet_turbo.__version__}")
-# Windows 应输出: Version: 2.0.0
-# Linux 若报错 "OSError: libepanet2.so not found"，请检查 LD_LIBRARY_PATH
+# 应输出: Version: 2.0.0
 ```
 
 ### 4. Linux 部署特别说明

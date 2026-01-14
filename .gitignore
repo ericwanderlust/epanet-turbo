@@ -1,26 +1,30 @@
 # Ephemeral / Build
 build/
+build_src/
 dist/
 dist_encrypted/
 __pycache__/
 *.egg-info/
+.github
 .venv/
 .vscode/
 .idea/
 test_streaming_out/
 test_streaming_out_small/
+Scripts/
 
-# Binaries & Artifacts (Ignore generally, but allow release binaries)
+# Binaries & Artifacts
 *.dll
 *.so
 *.pyd
 *.exe
 *.obj
 *.lib
-!epanet_turbo/dll/*.dll
-!epanet_turbo/dll/*.so
-!epanet_turbo/pyarmor_runtime_000000/*.so
-!epanet_turbo/pyarmor_runtime_000000/*.pyd
+
+# Encrypted Build Artifacts (Do NOT commit to GitHub - User must download Release)
+epanet_turbo/
+epanet_turbo_test/
+debug_runtime/
 
 # Notebooks
 *.ipynb
@@ -34,9 +38,11 @@ build_encrypted.py
 tests/
 doc/
 cmake/
-examples/
 tools/
+temp_verify/
+temp_deploy_env/
 .agent/
+!.agent/workflows/
 
 
 # Public Headers (Keep include/ but ignore junk)
@@ -52,4 +58,8 @@ include/*.def
 *.log
 test_protocol_v2.out
 .DS_Store
+# Release Artifacts
+EPANET-Turbo_*_Release/
+EPANET-Turbo_*_Release.zip
+
 Thumbs.db

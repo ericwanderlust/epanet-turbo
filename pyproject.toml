@@ -29,6 +29,7 @@ dependencies = [
     "polars>=0.20.0",
     "numpy>=1.24.0",
     "pandas>=2.0.0",
+    "requests>=2.31.0",
 ]
 
 [project.urls]
@@ -36,9 +37,9 @@ Homepage = "https://github.com/ericwanderlust/epanet-turbo"
 Repository = "https://github.com/ericwanderlust/epanet-turbo.git"
 
 [tool.setuptools]
-packages = ["epanet_turbo", "pyarmor_runtime_000000"]
+packages = ["epanet_turbo", "pyarmor_runtime_000000", "epanet_turbo.examples"]
 include-package-data = true
 
 [tool.setuptools.package-data]
 epanet_turbo = ["dll/*.dll"]
-pyarmor_runtime_000000 = ["*.pyd", "*.so", "*.dylib"]
+"pyarmor_runtime_000000" = ["__init__.py", "*.pyd", "*.so", "*.dylib"]
