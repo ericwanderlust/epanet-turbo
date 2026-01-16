@@ -44,4 +44,4 @@ include-package-data = true
 
 [tool.setuptools.package-data]
 epanet_turbo = ["dll/*.dll", "dll/*.dylib", "dll/*.so"]
-"pyarmor_runtime_000000" = ["__init__.py", "*.pyd", "*.so", "*.dylib"]
+"pyarmor_runtime_000000" = ["*", "linux_x86_64/*", "darwin_aarch64/*", "windows_x86_64/*"]

@@ -48,6 +48,14 @@ def create_bundle():
     else:
         print(f"   ❌ Missing {EXAMPLES_DIR}")
 
+    # 4.5 Copy Release Notes
+    release_notes = f"RELEASE_NOTES_v{VERSION}.md"
+    if os.path.exists(release_notes):
+        shutil.copy(release_notes, RELEASE_DIR)
+        print(f"   + Added {release_notes}")
+    else:
+        print(f"   ❌ Missing {release_notes}")
+
     # 5. Create README_RELEASE.txt
     readme_content = f"""
 ==================================================

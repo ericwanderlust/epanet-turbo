@@ -292,9 +292,14 @@ SEARCH_DIR = r"__SEARCH_DIR_PLACEHOLDER__"
 
 if not os.path.exists(INP_FILENAME):
     # Try finding it in the parent release folder using the injected path
-    potential_path = os.path.join(SEARCH_DIR, "Net1.inp")
-    if os.path.exists(potential_path):
-        INP_FILENAME = potential_path
+    candidates = [
+        os.path.join(SEARCH_DIR, "Net1.inp"),
+        os.path.join(SEARCH_DIR, "examples", "Net1.inp"),
+    ]
+    for cand in candidates:
+        if os.path.exists(cand):
+            INP_FILENAME = cand
+            break
     
 print(f"Debug: Final INP path = {INP_FILENAME}")
 
@@ -452,6 +457,10 @@ print("状态: 激活 (尽力而为模式)。")
 print("\\n[Quick Simulation / 快速模拟]")
 try:
     from epanet_turbo.examples import quickstart
+    # Monkey-patch the INP_FILE to ensure it finds the correct file
+    if os.path.exists(INP_FILENAME):
+        quickstart.INP_FILE = INP_FILENAME
+        
     # Run the demo and check results
     pressures, flows = quickstart.main()
     if pressures is not None and not pressures.empty:

@@ -81,7 +81,7 @@ def encrypt():
         
     cmd = [
         sys.executable, "-m", "pyarmor.cli", "gen",
-        "--platform", "windows.x86_64",
+        "--platform", "windows.x86_64,linux.x86_64,darwin.aarch64",
         "--output", target_output,
         OUTPUT_DIR # Obfuscate the WHOLE package directory
     ]
