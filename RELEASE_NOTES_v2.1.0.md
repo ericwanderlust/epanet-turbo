@@ -18,7 +18,15 @@
 
 ## 📦 如何安装 (Installation)
 
-推荐使用 Python 直接安装加密发布的 Wheel 包：
+推荐下载 **[EPANET-Turbo_v2.1.0_Release.zip](Releases/EPANET-Turbo_v2.1.0_Release.zip)**，并使用内置的安装器：
+
+```bash
+# 1. 解压后进入目录
+# 2. 运行一键安装与演示脚本
+python setup_and_demo.py
+```
+
+或者直接安装 Wheel 包：
 
 ```bash
 pip install ./dist/epanet_turbo-2.1.0-py3-none-any.whl
