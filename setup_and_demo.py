@@ -60,8 +60,9 @@ def main():
     import platform
     arch = platform.machine().lower()
     py_arch = platform.architecture()[0].lower()
+    system = platform.system()
     print(f"Diagnostic Info:")
-    print(f"  OS: {platform.system()} {platform.release()}")
+    print(f"  OS: {system} {platform.release()}")
     print(f"  Machine: {platform.machine()}")
     print(f"  Python: {sys.version.split()[0]} ({platform.architecture()[0]})")
     
@@ -80,7 +81,8 @@ def main():
         print("!"*60 + "\n")
         sys.exit(1)
 
-    if "arm" in arch or "aarch" in arch:
+    is_mac = system == "Darwin"
+    if ("arm" in arch or "aarch" in arch) and not is_mac:
         print("\n" + "!"*60)
         print("⚠️  WARNING: ARM Architecture Detected")
         print("EPANET-Turbo relies on x64 optimized DLLs (Intel/AMD).")
@@ -91,6 +93,8 @@ def main():
         print("!"*60 + "\n")
         # Give user a chance to abort if they know it won't work, but proceed if they want to try.
         # But if this IS the cause of pandas failure, we should note it.
+    elif is_mac and "arm" in arch:
+        print("✅ Apple Silicon (ARM64) detected. Native support enabled.")
         
     if "64" not in py_arch:
         print("❌ CRITICAL: 32-bit Python detected. This project requires 64-bit Python (x64).")
@@ -186,18 +190,26 @@ def main():
     print("🛠️  Installing... / 正在安装...")
     
     # Environment Check for CPU features (AVX2/Rosetta support)
-    polars_variant = "polars>=0.20.0"
+    polars_variant = "polars>=0.20.0" # Default to standard polars
     needs_compat = False
     try:
         # 1. Quick check via platform string
         import platform
         proc = platform.processor().lower()
-        if "apple" in proc or "virtual" in proc:
+        
+        # Special case for macOS ARM: Native polars works fine, so we don't strictly need rtcompat
+        # unless user specifically wants it. For now, we trust the logic but note that 
+        # macOS ARM wheels for polars are generally 'standard' but work.
+        # But let's stick to 'polars>=0.20.0' for macOS ARM to avoid issues with rtcompat variants missing.
+        is_mac_arm = platform.system() == "Darwin" and ("arm" in platform.machine().lower())
+        if is_mac_arm:
+             polars_variant = "polars>=0.20.0" 
+        elif "apple" in proc or "virtual" in proc: # Other Apple/Virtual machines might need compat
             needs_compat = True
-            
+        
         # 2. Definitive check via Windows API (AVX2 support)
         # PF_AVX2_INSTRUCTIONS_AVAILABLE = 40
-        if not needs_compat:
+        if not needs_compat and platform.system() == "Windows": # Only check AVX2 on Windows
             import ctypes
             if hasattr(ctypes, "windll") and hasattr(ctypes.windll.kernel32, "IsProcessorFeaturePresent"):
                 if ctypes.windll.kernel32.IsProcessorFeaturePresent(40) == 0:
@@ -263,12 +275,28 @@ def main():
     
     # Pre-inject the DLL fixer code into the demo script
     # This ensures the demo run itself attempts to self-heal
-    demo_header = """
+    # Inject the current CWD (where setup_and_demo.py is running) into the script
+    # so it can find Net1.inp even when running from temp
+    current_run_dir = os.getcwd().replace("\\", "\\\\") # Escape for string literal
+    
+    demo_header_template = """
 import sys
 import os
 import platform
 import ctypes
 from glob import glob
+from pathlib import Path
+
+INP_FILENAME = "Net1.inp"
+SEARCH_DIR = r"__SEARCH_DIR_PLACEHOLDER__"
+
+if not os.path.exists(INP_FILENAME):
+    # Try finding it in the parent release folder using the injected path
+    potential_path = os.path.join(SEARCH_DIR, "Net1.inp")
+    if os.path.exists(potential_path):
+        INP_FILENAME = potential_path
+    
+print(f"Debug: Final INP path = {INP_FILENAME}")
 
 def fix_dll_environment():
     \"\"\"
@@ -421,9 +449,19 @@ print("状态: 激活 (尽力而为模式)。")
 print("\\n[Quick Simulation / 快速模拟]")
 try:
     from epanet_turbo.examples import quickstart
-    print("✅ Simulation Passed. / 模拟测试通过。")
+    # Run the demo and check results
+    pressures, flows = quickstart.main()
+    if pressures is not None and not pressures.empty:
+        print(f"✅ Simulation Passed. / 模拟测试通过。 ({len(pressures)} steps)")
+        print(f"📊 Sample Pressure:\\n{pressures.iloc[:3, :3]}")
+    else:
+        print("❌ Simulation failed: Empty results. / 仿真失败：结果为空。")
+        sys.exit(1)
 except Exception as e:
-    print(f"⚠️ Simulation Warning: {e}")
+    print(f"💀 Simulation Error / 仿真错误: {e}")
+    import traceback
+    traceback.print_exc()
+    sys.exit(1)
 """
     
     import tempfile

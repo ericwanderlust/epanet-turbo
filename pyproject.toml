@@ -19,6 +19,8 @@ classifiers = [
     "Intended Audience :: Science/Research",
     "License :: OSI Approved :: MIT License",
     "Operating System :: Microsoft :: Windows",
+    "Operating System :: MacOS",
+    "Operating System :: POSIX :: Linux",
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
@@ -41,5 +43,5 @@ packages = ["epanet_turbo", "pyarmor_runtime_000000", "epanet_turbo.examples"]
 include-package-data = true
 
 [tool.setuptools.package-data]
-epanet_turbo = ["dll/*.dll"]
+epanet_turbo = ["dll/*.dll", "dll/*.dylib", "dll/*.so"]
 "pyarmor_runtime_000000" = ["__init__.py", "*.pyd", "*.so", "*.dylib"]

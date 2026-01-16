@@ -5,7 +5,7 @@
 ### 极速水力计算引擎 | High-Performance Hydraulic Engine
 
 [![Version](https://img.shields.io/badge/Version-v2.0.0-blue.svg)](https://github.com/ericwanderlust/epanet-turbo/releases)
-[![Platform](https://img.shields.io/badge/Platform-Windows%20%7C%20Linux-blueviolet.svg)]()
+[![Platform](https://img.shields.io/badge/Platform-Windows%20%7C%20Mac%20%7C%20Linux-blueviolet.svg)]()
 [![Python](https://img.shields.io/badge/Python-3.10%20%7C%203.11%20%7C%203.12-blue.svg)](https://pypi.org)
 [![License](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
@@ -21,7 +21,7 @@
 
 **EPANET-Turbo** 是专为**超大规模（10万-100万节点）**供水管网模型打造的高性能水力计算引擎。它基于行业标准的 **OWA-EPANET 2.3** 内核进行深度重构，通过引入 **OpenMP 并行计算**、**Rust (Polars) 极速数据层** 以及 **Batch API 批量接口**，解决了传统 EPANET/WNTR 在处理城市级全要素模型时的性能瓶颈。
 
-v2.0 版本标志着 **M6 (跨平台)** 里程碑的完成，正式实现了 Windows 与 Linux 的全平台统一，无论是高性能工作站还是云端 Linux 集群，都能获得一致的极致计算体验。
+v2.0 版本标志着 **M6 (全平台原生支持)** 里程碑的完成，正式实现了 **Windows、macOS (Apple Silicon/Intel) 与 Linux** 的全平台统一。无论是 Mac Studio 还是云端 Linux 集群，都能获得一致的极致计算体验。
 
 ### 🚀 核心价值
 
@@ -43,7 +43,7 @@ v2.0 版本标志着 **M6 (跨平台)** 里程碑的完成，正式实现了 Win
 | **M3** | v1.1.0 | **Streaming Sink**: 针对长周期仿真 (EPS) 引入 Protocol V1 流式结果存储，解决内存溢出 (OOM) 难题。 | ✅ 完成 |
 | **M4** | v1.2.0 | **Open-Once**: 实现内存驻留模式。在滚动预测场景下，消除了 90% 的重复初始化（Open/Close）时间。 | ✅ 完成 |
 | **M5** | v1.4.0 | **Unified Matrix**: 升级 CMake 构建系统，支持单次编译同时产出 Serial 与 OpenMP 双版本内核。 | ✅ 完成 |
-| **M6** | v2.0.0 | **Cross-Platform**: 攻克 Linux 编译适配与 PyArmor 跨平台运行时，正式发布 Linux 原生支持与 Protocol V2 格式。 | ✅ 完成 |
+| **M6** | v2.0.0 | **原生全平台**: Windows / macOS / Linux 全适配 | ✅ 完成 |
 
 ### 🔮 未来蓝图 (Future Blueprint)
 
@@ -260,7 +260,7 @@ print("Simulation complete.")
 
 **EPANET-Turbo** is a high-performance hydraulic simulation engine tailored for **Ultra-Large Scale (100k-1M nodes)** water distribution networks. Built upon the **OWA-EPANET 2.3** kernel, it shatters performance bottlenecks through **OpenMP Parallelism**, **Polars Data Engine**, and **Batch APIs**.
 
-v2.0 marks the completion of the **M6 Milestone**, delivering a truly **Unified Cross-Platform Experience** on both Windows and Linux.
+v2.0 marks the completion of the **M6: Full Platform Native Support** milestone, officially unifying **Windows, macOS (Apple Silicon/Intel), and Linux**. From Mac Studio to cloud-based Linux clusters, developers now get a consistent, high-performance experience.
 
 ### 🚀 Core Values
 
@@ -280,7 +280,7 @@ v2.0 marks the completion of the **M6 Milestone**, delivering a truly **Unified 
 | **M3** | v1.1.0 | **Streaming Sink**: Implemented Protocol V1 streaming IO to solve OOM issues during long-duration EPS runs. | ✅ Done |
 | **M4** | v1.2.0 | **Open-Once**: Memory-resident handles eliminated 90% of initialization overhead for rolling predictions. | ✅ Done |
 | **M5** | v1.4.0 | **Unified Matrix**: Single CMake system generating both Serial and OpenMP binaries. | ✅ Done |
-| **M6** | v2.0.0 | **Cross-Platform**: Achieved native Linux support (`libepanet2.so`) and Protocol V2 format. | ✅ Done |
+| **M6** | v2.0.0 | **Native Platforms**: Unification of Windows, macOS (Apple Silicon), and Linux. | ✅ Done |
 
 ### 🔮 Future Blueprint
 

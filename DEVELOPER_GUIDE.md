@@ -15,7 +15,7 @@ Standard EPANET/WNTR workflows suffer from **Single-Threaded Bottlenecks** and *
 | Metric (指标)          | Standard WNTR / EPANET | **EPANET-Turbo 2.0**  | Improvement (提升)        |
 | :--------------------- | :--------------------- | :-------------------------- | :------------------------ |
 | **Parsing (IO)** | 45s (Large Network)    | **< 0.8s**            | **50x Faster**      |
-| **Simulation**   | Serial (1 Core)        | **Parallel (OpenMP)** | **5x - 10x Faster** |
+| **Simulation**   | Serial (1 Core)        | **Parallel (OpenMP)** | **5x - 10x Faster** | (Windows/Mac/Linux) |
 | **Data Access**  | Slow Python Objects    | **Zero-Copy Polars**  | **100x Faster**     |
 
 ### 💡 Technology Stack (技术原理)
@@ -40,12 +40,12 @@ Standard EPANET/WNTR workflows suffer from **Single-Threaded Bottlenecks** and *
 We adhere to the **"Three-Layer Architecture"** to balance performance and usability.
 我们遵循**“三层架构”**设计，以平衡性能与易用性。
 
-* **Layer 1 (Core)**: C/C++ Engine with OpenMP optimizations (`epanet2_openmp.dll`).
-  * *Role*: Heavy lifting, matrix inversion.
+* **Layer 1 (Core)**: C/C++ Engine with OpenMP optimizations (`epanet2_openmp.dll`, `libepanet2.dylib`, `libepanet2.so`).
+  * *Role*: Heavy lifting, matrix inversion. Optimized for each platform.
 * **Layer 2 (Bridge)**: `engine.py` using CTypes.
-  * *Role*: Minimalist automated loading of DLLs.
+  * *Role*: Automated loading and cross-platform binary detection.
 * **Layer 3 (API)**: `parser.py` using Polars.
-  * *Role*: Provides a user-friendly DataFrame interface.
+  * *Role*: Provides a user-friendly DataFrame interface (Zero-copy).
 
 ---
 
@@ -161,13 +161,52 @@ pip install dist/epanet_turbo-2.0.0-py3-none-any.whl
 
 ### 🧱 Prerequisites (环境要求)
 
-* **System**: Windows 10/11 x64
-* **Runtime**: Microsoft Visual C++ Redistributable (vcruntime140.dll)
-  * *Included in automated install via NumPy.* / *自动化安装已包含。*
+* **Windows**: 10/11 x64 + Microsoft Visual C++ Redistributable.
+* **macOS**: 12+ (Monterey) on Apple Silicon (ARM64) or Intel (x64).
+* **Linux**: x86_64 with GLIBC >= 2.31 (e.g. Ubuntu 20.04+, Debian 11+).
+* **Python**: 3.10, 3.11, or 3.12 (64-bit).
 
 ---
 
-## 🛠️ 5. Troubleshooting (疑难解答)
+---
+
+## 🦾 5. Special Case: Reinforcement Learning (RL) Integration
+
+## 🦾 5. 强化学习 (RL) 集成专项指南
+
+When integrating EPANET-Turbo into an RL environment (e.g., Gym/PettingZoo), keep these lessons from "Battle-Hardened" production in mind:
+在将 EPANET-Turbo 集成到 RL 环境（如 Gym）时，请务必关注以下来自实际生产环境的经验：
+
+### 5.1 Indexing Differences (索引差异)
+
+* **Problem**: WNTR usually returns an integer-indexed DataFrame, but Turbo returns a **`TimedeltaIndex`**.
+* **Fix**: Use position-based indexing (`.iloc[0]`) instead of label-based (`.loc[0]`) to extract specific time steps.
+* **CN**: WNTR 默认返回整数索引，而 Turbo 返回 **`TimedeltaIndex`**。请统一使用 `.iloc` 进行位置索引以保证兼容性。
+
+### 5.2 Numerical Stability (数值稳定性)
+
+* **NaN Handling**: Agent exploration might cause extreme pump speeds leading to negative pressures or hydraulic failures (NaN). Use `np.nan_to_num()` before feeding results to the Neural Network.
+* **Reward Clamping**: Always clamp your rewards (e.g., `-100` to `+50`) to prevent gradient explosions caused by failed simulations.
+* **CN**: 强化学习初期的随机探索可能导致极端的泵速动作，引发负压或仿真失败 (NaN)。在将结果输入神经网络前，务必进行 `NaN` 清洗及奖励值截断 (Clamping)。
+
+### 5.3 Hybrid Drive Mode (混合驱动模式)
+
+* **Design**: Use **WNTR** as the "Model Manager" (to modify pumps/demands and export `.inp`) and **EPANET-Turbo** as the "Execution Engine" (to run bits as fast as possible).
+* **CN**: 推荐使用 **WNTR** 作为“模型管理器”（负责拓扑操作、导出 `.inp`），使用 **EPANET-Turbo** 作为“高速执行引擎”。
+
+---
+
+## 🛠️ 6. Troubleshooting (疑难解答)
+
+### Q: How do I see available functions? (如何查看可用函数？)
+
+* **EN**: Since Version 2.0.0, use the built-in `about()` function to inspect the API.
+* **CN**: v2.0.0 起，可直接调用 `about()` 函数查看 API 参考信息。
+
+```python
+import epanet_turbo as et
+et.about()
+```
 
 ### Q: `ImportError: DLL load failed`?
 

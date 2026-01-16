@@ -42,6 +42,8 @@ def main():
     print("\n" + "="*50)
     print("✅ Demo completed!")
     print("="*50)
+    
+    return pressures, flows
 
 
 if __name__ == "__main__":

@@ -118,13 +118,17 @@ def finalize_package():
     with open(os.path.join(dest_examples, "__init__.py"), "w") as f:
         f.write("# Examples package\n")
         
-    # 2. DLLs
+    # 2. DLLs (Synchronize from src/dll)
     dest_dll = os.path.join(OUTPUT_DIR, "dll")
-    src_dll = os.path.join(RESOURCES_DIR, "dll")
+    src_dll = os.path.join(SRC_DIR, "dll")
     if os.path.exists(src_dll):
+        print(f"📁 Synchronizing binaries from {src_dll}...")
+        # Clean destination if it exists from obfuscation step
+        if os.path.exists(dest_dll):
+            shutil.rmtree(dest_dll)
         shutil.copytree(src_dll, dest_dll)
     else:
-        print("⚠️  WARNING: resources/dll not found! Package will lack engine binaries.")
+        print(f"⚠️  WARNING: {src_dll} not found!")
 
 def build_wheel():
     print("🚀 Building Wheel...")
