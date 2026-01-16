@@ -1,7 +1,6 @@
 # Ephemeral / Build
 build/
 build_src/
-dist/
 dist_encrypted/
 __pycache__/
 *.egg-info/
@@ -14,12 +13,12 @@ test_streaming_out_small/
 Scripts/
 
 # Binaries & Artifacts
-*.dll
-*.so
+# *.dll
+# *.so
 *.pyd
 *.exe
 *.obj
-*.lib
+# *.lib
 
 # Encrypted Build Artifacts (Do NOT commit to GitHub - User must download Release)
 epanet_turbo/
