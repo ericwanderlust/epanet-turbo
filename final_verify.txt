@@ -1,0 +1,2 @@
+Result: 25 steps, 11 nodes, 13 links
+PASS
