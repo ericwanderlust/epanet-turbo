@@ -113,7 +113,6 @@ Python 生态中水力模型处理通常受限于 Pandas 的单线程性能。EP
 | ├── `engine.py` | 底层驱动: 负责加载 DLL 并通过 CTypes 调用 C 函数 |
 | ├── `parser.py` | **Polars 解析器**: 极速读取 INP 文件 |
 | ├── `streaming.py` | 流式输出器: 实现 Protocol V2 二进制写出 |
-| **`src/`** | **原始源码** (Unencrypted, Local Only) |
 | **`resources/`** | **资源归档**: 原始二进制库备份与辅助文件 |
 | **`include/`** | **C 头文件**: 包含 `epanet2.h` 等开发所需的 API 定义 |
 | **`dev_tools/`** | **开发工具箱**: 构建脚本 (`make_release.py`) 与 CI/CD 工具 |
@@ -344,7 +343,6 @@ The **Batch API** allows injecting millions of parameter changes (e.g., node dem
 | ├── `engine.py` | Driver: Handles DLL loading and CTypes mapping |
 | ├── `parser.py` | **Polars Parser**: Ultra-fast INP reader |
 | ├── `streaming.py` | Streaming Output: Protocol V2 implementation |
-| **`src/`** | **Source Code** (Unencrypted, Local Only) |
 | **`resources/`** | **Archives**: Legacy binaries & assets |
 | **`include/`** | **Headers**: Public C API definitions (`epanet2.h`) |
 | **`dev_tools/`** | **Dev Toolkit**: Build scripts (`make_release.py`) & CI utils |
