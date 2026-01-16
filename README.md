@@ -108,12 +108,15 @@ Python 生态中水力模型处理通常受限于 Pandas 的单线程性能。EP
 
 | 目录/文件 | 说明 |
 | :--- | :--- |
-| **`epanet_turbo/`** | **Python 包核心** (Encrypted) |
+| **`epanet_turbo/`** | **Python 包核心** (Encrypted, Git Tracked) |
 | ├── `dll/` | **预编译内核**: 包含 `epanet2.dll` (Win), `libepanet2.dylib` (Mac), `libepanet2.so` (Linux) |
 | ├── `engine.py` | 底层驱动: 负责加载 DLL 并通过 CTypes 调用 C 函数 |
 | ├── `parser.py` | **Polars 解析器**: 极速读取 INP 文件 |
-| └── `streaming.py` | 流式输出器: 实现 Protocol V2 二进制写出 |
+| ├── `streaming.py` | 流式输出器: 实现 Protocol V2 二进制写出 |
+| **`src/`** | **原始源码** (Unencrypted, Local Only) |
+| **`resources/`** | **资源归档**: 原始二进制库备份与辅助文件 |
 | **`include/`** | **C 头文件**: 包含 `epanet2.h` 等开发所需的 API 定义 |
+| **`dev_tools/`** | **开发工具箱**: 构建脚本 (`make_release.py`) 与 CI/CD 工具 |
 | **`examples/`** | **开源示例 (Open Source)**: 供用户学习与复制 |
 | ├── `quickstart.py` | 基础功能演示 |
 | ├── `turbo_adapter.py` | **WNTR 适配器** (可直接复制到您项目中使用) |
@@ -336,12 +339,15 @@ The **Batch API** allows injecting millions of parameter changes (e.g., node dem
 
 | Path | Description |
 | :--- | :--- |
-| **`epanet_turbo/`** | **Core Package** (Encrypted) |
+| **`epanet_turbo/`** | **Core Package** (Encrypted, Git Tracked) |
 | ├── `dll/` | **Kernels**: `epanet2.dll` (Win), `libepanet2.dylib` (Mac), `libepanet2.so` (Linux) |
 | ├── `engine.py` | Driver: Handles DLL loading and CTypes mapping |
 | ├── `parser.py` | **Polars Parser**: Ultra-fast INP reader |
-| └── `streaming.py` | Streaming Output: Protocol V2 implementation |
+| ├── `streaming.py` | Streaming Output: Protocol V2 implementation |
+| **`src/`** | **Source Code** (Unencrypted, Local Only) |
+| **`resources/`** | **Archives**: Legacy binaries & assets |
 | **`include/`** | **Headers**: Public C API definitions (`epanet2.h`) |
+| **`dev_tools/`** | **Dev Toolkit**: Build scripts (`make_release.py`) & CI utils |
 | `pyproject.toml` | Config: Dependencies & Metadata |
 
 ---
