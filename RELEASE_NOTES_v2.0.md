@@ -60,6 +60,41 @@ pip install .
 - **OS**: Windows x64 或 Linux x64
 - **Core Deps**: `polars>=0.20`, `numpy>=1.24`
 
+### Installation Logic Flow (安装逻辑一览)
+
+```mermaid
+graph TD
+    Start[Start Setup] --> CheckOS{Check OS & Python}
+    CheckOS -- "Unsupported (<3.10, ARM Native)" --> Error[Exit with Error]
+    CheckOS -- "OK" --> CheckVenv{Inside Venv?}
+    
+    CheckVenv -- "No" --> AskVenv{Create Venv?}
+    AskVenv -- "Yes" --> CreateVenv[Create clean venv 'epanet_env']
+    CreateVenv --> Relaunch[Relaunch Script in Venv]
+    Relaunch --> CheckVenv
+    
+    AskVenv -- "No (User Risk)" --> Warn[Warning: Global Install]
+    CheckVenv -- "Yes" --> CheckMirror{Use CN Mirror?}
+    Warn --> CheckMirror
+    
+    CheckMirror -- "Yes" --> SetMirror[Set Tsinghua Mirror]
+    CheckMirror -- "No" --> LocateWhl[Find .whl Package]
+    SetMirror --> LocateWhl
+    
+    LocateWhl --> Install[pip install package]
+    Install -- "Success" --> Verify[Run Verification Demo]
+    Install -- "Fail" --> CheckErr{Error Type?}
+    
+    CheckErr -- "uninstall-no-record" --> SelfHeal[Self-Healing: Force Reinstall Runtime]
+    SelfHeal --> Install
+    CheckErr -- "Other" --> Fail[Installation Failed]
+    
+    Verify --> DemoCheck{Import Success?}
+    DemoCheck -- "Yes" --> Success[ALL SYSTEMS GO ✅]
+    DemoCheck -- "No (DLL Load Fail)" --> DLLFix[Runtime Diagnostic & Path Injection]
+    DLLFix --> DemoCheck
+```
+
 ---
 
 *Copyright © 2026 ES (Serein). All Rights Reserved.*
