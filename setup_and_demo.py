@@ -418,6 +418,9 @@ def fix_dll_environment():
 fix_dll_environment()
 """
 
+    # Inject the search directory
+    demo_header = demo_header_template.replace("__SEARCH_DIR_PLACEHOLDER__", current_run_dir)
+
     demo_code = demo_header + """
 print("⏳ Importing epanet_turbo... / 正在导入库...")
 try:
