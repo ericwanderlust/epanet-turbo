@@ -109,7 +109,7 @@ Python 生态中水力模型处理通常受限于 Pandas 的单线程性能。EP
 | 目录/文件 | 说明 |
 | :--- | :--- |
 | **`epanet_turbo/`** | **Python 包核心** (Encrypted) |
-| ├── `dll/` | **预编译内核**: 包含 `epanet2.dll` (Win), `libepanet2.so` (Linux) |
+| ├── `dll/` | **预编译内核**: 包含 `epanet2.dll` (Win), `libepanet2.dylib` (Mac), `libepanet2.so` (Linux) |
 | ├── `engine.py` | 底层驱动: 负责加载 DLL 并通过 CTypes 调用 C 函数 |
 | ├── `parser.py` | **Polars 解析器**: 极速读取 INP 文件 |
 | └── `streaming.py` | 流式输出器: 实现 Protocol V2 二进制写出 |
@@ -147,7 +147,7 @@ EPANET-Turbo 与 OWA-EPANET **100% 兼容**。
 3. 使用 **EPANET-Turbo** 进行大规模仿真（蒙特卡洛、PDA 等）。
 4. 加载二进制结果进行后续分析。
 
-> 💡 参见示例: `examples/wntr_compatibility.py` (仅本地可见)
+> 💡 参见示例: [demo_adapter.py](examples/demo_adapter.py) (展示如何将 WNTR 与项目集成)
 
 ---
 
@@ -171,7 +171,7 @@ EPANET-Turbo 采用 **"全平台二进制分发"** 模式，用户无需安装 C
 
 ### 1. 环境要求
 
-- **OS**: Windows 10/11 (x64) 或 Linux (Ubuntu 20.04+, RHEL 8+, glibc 2.29+)
+- **OS**: Windows 10/11 (x64), Linux (glibc 2.29+), macOS (Apple Silicon/Intel)
 - **Python**: 3.10, 3.11, 3.12 (推荐 3.12 以获得最佳性能)
 - **核心依赖**:
   - `polars >= 0.20.0` (极速数据处理)
@@ -179,10 +179,18 @@ EPANET-Turbo 采用 **"全平台二进制分发"** 模式，用户无需安装 C
 
 ### 2. 安装步骤 (Installation)
 
-前往 [Github Releases](https://github.com/ericwanderlust/epanet-turbo/releases) 页面下载最新的 `.whl` 文件。
+前往 [Github Releases](https://github.com/ericwanderlust/epanet-turbo/releases) 下载最新的发布包 ZIP。
+
+**推荐方式 (一键安装器)**:
 
 ```bash
-# 安装下载的 Wheel 包
+# 在解压后的目录中直接运行，自动创建虚拟环境并验证
+python setup_and_demo.py
+```
+
+**手动方式 (直接安装 Wheel)**:
+
+```bash
 pip install epanet_turbo-2.0.0-py3-none-any.whl
 ```
 
@@ -329,7 +337,7 @@ The **Batch API** allows injecting millions of parameter changes (e.g., node dem
 | Path | Description |
 | :--- | :--- |
 | **`epanet_turbo/`** | **Core Package** (Encrypted) |
-| ├── `dll/` | **Kernels**: Pre-compiled `epanet2.dll` (Win) & `libepanet2.so` (Linux) |
+| ├── `dll/` | **Kernels**: `epanet2.dll` (Win), `libepanet2.dylib` (Mac), `libepanet2.so` (Linux) |
 | ├── `engine.py` | Driver: Handles DLL loading and CTypes mapping |
 | ├── `parser.py` | **Polars Parser**: Ultra-fast INP reader |
 | └── `streaming.py` | Streaming Output: Protocol V2 implementation |
@@ -362,7 +370,7 @@ EPANET-Turbo is **100% compatible** with OWA-EPANET.
 3. Use **EPANET-Turbo** for massive simulations (Monte-Carlo, PDA).
 4. Load binary results for analysis.
 
-> 💡 See example: `examples/wntr_compatibility.py` (Local only)
+> 💡 See example: [demo_adapter.py](examples/demo_adapter.py) (WNTR Integration)
 
 ---
 
@@ -372,13 +380,21 @@ EPANET-Turbo uses a **Binary Distribution** model. No C/C++ compiler is needed.
 
 ### 1. Requirements
 
-- **OS**: Windows 10/11 (x64) or Linux (Ubuntu 20.04+, RHEL 8+, glibc 2.29+)
+- **OS**: Windows x64, Linux (glibc 2.29+), macOS (Apple Silicon/Intel)
 - **Python**: 3.10, 3.11, 3.12 (Recommended: 3.12)
 - **Dependencies**: `polars >= 0.20.0`, `numpy >= 1.20.0`
 
 ### 2. Installation steps
 
-Go to [Github Releases](https://github.com/ericwanderlust/epanet-turbo/releases) and download the latest `.whl` package.
+Go to [Github Releases](https://github.com/ericwanderlust/epanet-turbo/releases) and download the release ZIP.
+
+**Recommended (One-click Installer)**:
+
+```bash
+python setup_and_demo.py
+```
+
+**Manual (Wheel)**:
 
 ```bash
 pip install epanet_turbo-2.0.0-py3-none-any.whl
