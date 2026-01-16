@@ -1,4 +1,4 @@
-﻿import requests
+import requests
 import os
 import socket
 import platform

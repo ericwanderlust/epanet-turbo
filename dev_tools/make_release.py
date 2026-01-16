@@ -6,7 +6,7 @@ import codecs
 
 # Configuration
 import time
-VERSION = "2.0.0"
+VERSION = "2.1.0"
 SRC_DIR = "src"
 # Use a timestamp to avoid "File in use" errors on Windows
 BUILD_SRC_DIR = f"build_src_{int(time.time())}"
@@ -120,7 +120,7 @@ def finalize_package():
         
     # 2. DLLs (Synchronize from src/dll)
     dest_dll = os.path.join(OUTPUT_DIR, "dll")
-    src_dll = os.path.join(SRC_DIR, "dll")
+    src_dll = os.path.join(RESOURCES_DIR, "dll")
     if os.path.exists(src_dll):
         print(f"📁 Synchronizing binaries from {src_dll}...")
         # Clean destination if it exists from obfuscation step

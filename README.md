@@ -1,10 +1,10 @@
 <div align="center">
 
-# 🏎️ EPANET-Turbo v2.0
+# 🏎️ EPANET-Turbo v2.1
 
 ### 极速水力计算引擎 | High-Performance Hydraulic Engine
 
-[![Version](https://img.shields.io/badge/Version-v2.0.0-blue.svg)](https://github.com/ericwanderlust/epanet-turbo/releases)
+[![Version](https://img.shields.io/badge/Version-v2.1.0-blue.svg)](https://github.com/ericwanderlust/epanet-turbo/releases)
 [![Platform](https://img.shields.io/badge/Platform-Windows%20%7C%20Mac%20%7C%20Linux-blueviolet.svg)]()
 [![Python](https://img.shields.io/badge/Python-3.10%20%7C%203.11%20%7C%203.12-blue.svg)](https://pypi.org)
 [![License](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
@@ -44,6 +44,7 @@ v2.0 版本标志着 **M6 (全平台原生支持)** 里程碑的完成，正式�
 | **M4** | v1.2.0 | **Open-Once**: 实现内存驻留模式。在滚动预测场景下，消除了 90% 的重复初始化（Open/Close）时间。 | ✅ 完成 |
 | **M5** | v1.4.0 | **Unified Matrix**: 升级 CMake 构建系统，支持单次编译同时产出 Serial 与 OpenMP 双版本内核。 | ✅ 完成 |
 | **M6** | v2.0.0 | **原生全平台**: Windows / macOS / Linux 全适配 | ✅ 完成 |
+| **M6-2** | v2.1.0 | **Rules Optimization** *(Windows)*: 规则引擎状态驱动优化，1000规则模型 controls 占比从 11% 降到 0.07%，跳过率 99.93% | ✅ 完成 |
 
 ### 🔮 未来蓝图 (Future Blueprint)
 
@@ -83,6 +84,24 @@ Python 生态中水力模型处理通常受限于 Pandas 的单线程性能。EP
 
 - **传统方式**: Python 循环调用 `EN_setnodevalue` -> 产生 10万次 CTypes 调用开销 -> 极慢。
 - **Turbo 方式**: 调用 `ENT_set_node_values(indices, values)` -> **1次** CTypes 调用 -> C 语言内部循环 -> **O(1)** 瞬间完成。
+
+### 4. 🎯 v2.1 新特性: 规则引擎状态驱动优化 *(Windows)*
+
+对于包含大量控制规则 (RULES) 的模型，规则评估可能占据 10-20% 的仿真时间。v2.1 引入了**状态驱动跳过**机制：
+
+- **依赖追踪**: 每条规则在编译时分析其依赖的节点/管段。
+- **代际标记**: 液压求解后，仅标记状态发生变化的元素。
+- **智能跳过**: 如果规则依赖的元素未变化，直接跳过评估。
+
+**性能对比** (1000条规则模型):
+
+| 指标 | 优化前 | v2.1 优化后 | 提升 |
+|:-----|:-------|:------------|:-----|
+| Controls 占比 | 11.24% | **0.07%** | **↓ 160x** |
+| 规则评估次数 | 1,440,000 | **1,000** | **↓ 1440x** |
+| 跳过率 | 0% | **99.93%** | - |
+
+> ⚠️ 此特性目前仅 Windows 平台可用，macOS/Linux 将在后续版本支持。
 
 ---
 
@@ -203,7 +222,7 @@ pip install epanet_turbo-2.0.0-py3-none-any.whl
 ```python
 import epanet_turbo
 print(f"Version: {epanet_turbo.__version__}")
-# 应输出: Version: 2.0.0
+# 应输出: Version: 2.1.0
 ```
 
 ### 4. Linux 部署特别说明
@@ -291,6 +310,7 @@ v2.0 marks the completion of the **M6: Full Platform Native Support** milestone,
 | **M4** | v1.2.0 | **Open-Once**: Memory-resident handles eliminated 90% of initialization overhead for rolling predictions. | ✅ Done |
 | **M5** | v1.4.0 | **Unified Matrix**: Single CMake system generating both Serial and OpenMP binaries. | ✅ Done |
 | **M6** | v2.0.0 | **Native Platforms**: Unification of Windows, macOS (Apple Silicon), and Linux. | ✅ Done |
+| **M6-2** | v2.1.0 | **Rules Optimization** *(Windows)*: State-driven rule engine, 99.93% skip rate for 1000-rule models (controls overhead: 11% → 0.07%) | ✅ Done |
 
 ### 🔮 Future Blueprint
 
@@ -317,6 +337,24 @@ By leveraging **Polars** (written in Rust), we bypass the Python GIL and Pandas 
 
 Traditional Python loops for parameter adjustment invoke CTypes overhead thousands of times.
 The **Batch API** allows injecting millions of parameter changes (e.g., node demands, pipe roughness) in a **single O(1) call**.
+
+### 4. 🎯 v2.1: State-Driven Rule Engine *(Windows)*
+
+For models with many control rules, rule evaluation can consume 10-20% of simulation time. v2.1 introduces **state-driven skipping**:
+
+- **Dependency Tracking**: Each rule's dependencies are analyzed at compile time.
+- **Generation Marking**: After hydraulic solving, only changed elements are marked.
+- **Smart Skipping**: Rules are skipped if their dependencies haven't changed.
+
+**Performance** (1000-rule model):
+
+| Metric | Before | v2.1 | Improvement |
+|:-------|:-------|:-----|:------------|
+| Controls % | 11.24% | **0.07%** | **↓ 160x** |
+| Evaluations | 1,440,000 | **1,000** | **↓ 1440x** |
+| Skip Rate | 0% | **99.93%** | - |
+
+> ⚠️ Currently Windows only. macOS/Linux support coming in future releases.
 
 ---
 
@@ -401,7 +439,7 @@ python setup_and_demo.py
 **Manual (Wheel)**:
 
 ```bash
-pip install epanet_turbo-2.0.0-py3-none-any.whl
+pip install epanet_turbo-2.1.0-py3-none-any.whl
 ```
 
 ### 3. Verify Installation
@@ -409,7 +447,7 @@ pip install epanet_turbo-2.0.0-py3-none-any.whl
 ```python
 import epanet_turbo
 print(f"Version: {epanet_turbo.__version__}")
-# Windows: Should print Version: 2.0.0
+# Windows: Should print Version: 2.1.0
 # Linux: If "OSError: libepanet2.so not found", check LD_LIBRARY_PATH
 ```
 
