@@ -330,8 +330,8 @@ v2.0 marks the completion of the **M6: Full Platform Native Support** milestone,
 | :----------- | :----- | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :----------- |
 | **M7** | v2.3.0 | **Linear Solver Optimization**: **Parallel Cholesky Decomposition**. Targeting the final CPU bottleneck in hydraulic solver.                                          | 🏗️ Planned |
 | **M8** | v3.0.0 | **Rust Acceleration Layer**: **Underlying Architecture Rewrite**. Using PyO3/Rust to replace CTypes glue layer for nanosecond interoperability.                       | 📅 Future    |
-| **M8** | v3.0.0 | **GPU Empowerment (Outer-loop)**: Accelerating the "Outer-loop" (Calibration, Optimization) directly on GPUs. Transforming 10k serial runs into parallel tensor operations. | 📅 Future    |
-| **M9** | v4.0.0 | **AI Surrogate**: Built-in Graph Neural Network (GNN) calibration and hybrid "Prediction-Simulation" drivers.                                                               | 📅 Future    |
+| **M8** | v4.0.0 | **GPU Empowerment (Outer-loop)**: Accelerating the "Outer-loop" (Calibration, Optimization) directly on GPUs. Transforming 10k serial runs into parallel tensor operations. | 📅 Future    |
+| **M9** | v5.0.0 | **AI Surrogate**: Built-in Graph Neural Network (GNN) calibration and hybrid "Prediction-Simulation" drivers.                                                               | 📅 Future    |
 
 ---
 
