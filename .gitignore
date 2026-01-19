@@ -24,6 +24,7 @@ Scripts/
 epanet_turbo/
 epanet_turbo_test/
 debug_runtime/
+dist/
 
 # Notebooks
 *.ipynb

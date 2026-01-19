@@ -1,11 +1,11 @@
 <div align="center">
 
-# 🏎️ EPANET-Turbo v2.1
+# 🏎️ EPANET-Turbo v2.2
 
 ### 极速水力计算引擎 | High-Performance Hydraulic Engine
 
-[![Version](https://img.shields.io/badge/Version-v2.1.0-blue.svg)](https://github.com/ericwanderlust/epanet-turbo/releases)
-[![Platform](https://img.shields.io/badge/Platform-Windows%20%7C%20Mac%20%7C%20Linux-blueviolet.svg)]()
+[![Version](https://img.shields.io/badge/Version-v2.2.0-blue.svg)](https://github.com/ericwanderlust/epanet-turbo/releases)
+[![Platform](https://img.shields.io/badge/Platform-Windows%20(Parallel)%20%7C%20Mac%20%7C%20Linux-blueviolet.svg)]()
 [![Python](https://img.shields.io/badge/Python-3.10%20%7C%203.11%20%7C%203.12-blue.svg)](https://pypi.org)
 [![License](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
@@ -36,25 +36,27 @@ v2.0 版本标志着 **M6 (全平台原生支持)** 里程碑的完成，正式�
 
 我们始终致力于挑战性能极限。以下是 EPANET-Turbo 的技术演进史：
 
-| 里程碑 | 版本 | 核心成就 | 状态 |
-|:-------|:-----|:---------|:-----|
-| **M1** | v0.1.0 | **OpenMP Genesis**: 首次在 OWA 内核中引入 OpenMP，实现水力求解器 (`hydsolver`) 的多线程并行加速。 | ✅ 完成 |
-| **M2** | v1.0.0 | **Polars Integration**: 彻底重构 Python 层，引入 Rust 编写的 Polars 引擎，INP 解析速度提升 10 倍以上。 | ✅ 完成 |
-| **M3** | v1.1.0 | **Streaming Sink**: 针对长周期仿真 (EPS) 引入 Protocol V1 流式结果存储，解决内存溢出 (OOM) 难题。 | ✅ 完成 |
-| **M4** | v1.2.0 | **Open-Once**: 实现内存驻留模式。在滚动预测场景下，消除了 90% 的重复初始化（Open/Close）时间。 | ✅ 完成 |
-| **M5** | v1.4.0 | **Unified Matrix**: 升级 CMake 构建系统，支持单次编译同时产出 Serial 与 OpenMP 双版本内核。 | ✅ 完成 |
-| **M6** | v2.0.0 | **原生全平台**: Windows / macOS / Linux 全适配 | ✅ 完成 |
-| **M6-2** | v2.1.0 | **Rules Optimization** *(Windows)*: 规则引擎状态驱动优化，1000规则模型 controls 占比从 11% 降到 0.07%，跳过率 99.93% | ✅ 完成 |
+| 里程碑         | 版本   | 核心成就                                                                                                                                | 状态    |
+| :------------- | :----- | :-------------------------------------------------------------------------------------------------------------------------------------- | :------ |
+| **M1**   | v0.1.0 | **OpenMP Genesis**: 首次在 OWA 内核中引入 OpenMP，实现水力求解器 (`hydsolver`) 的多线程并行加速。                               | ✅ 完成 |
+| **M2**   | v1.0.0 | **Polars Integration**: 彻底重构 Python 层，引入 Rust 编写的 Polars 引擎，INP 解析速度提升 10 倍以上。                            | ✅ 完成 |
+| **M3**   | v1.1.0 | **Streaming Sink**: 针对长周期仿真 (EPS) 引入 Protocol V1 流式结果存储，解决内存溢出 (OOM) 难题。                                 | ✅ 完成 |
+| **M4**   | v1.2.0 | **Open-Once**: 实现内存驻留模式。在滚动预测场景下，消除了 90% 的重复初始化（Open/Close）时间。                                    | ✅ 完成 |
+| **M5**   | v1.4.0 | **Unified Matrix**: 升级 CMake 构建系统，支持单次编译同时产出 Serial 与 OpenMP 双版本内核。                                       | ✅ 完成 |
+| **M6**   | v2.0.0 | **原生全平台**: Windows / macOS / Linux 全适配                                                                                    | ✅ 完成 |
+| **M6-2** | v2.1.0 | **Rules Optimization** *(Windows)*: 规则引擎状态驱动优化，1000规则模型 controls 占比从 11% 降到 0.07%，跳过率 99.93%            | ✅ 完成 |
+| **M6-3** | v2.2.0 | **Parallel Numerical Engine** *(Windows)*: 实现并行水头损失计算与分段锁矩阵组装，加速比提升至 2.6x (16核)，保持 100% 数值确定性 | ✅ 完成 |
 
 ### 🔮 未来蓝图 (Future Blueprint)
 
 我们不会止步于此。2026 年接下来的计划：
 
-| 里程碑 | 预估版本 | 核心目标 | 状态 |
-|:-------|:-----|:---------|:-----|
-| **M7** | v2.2.0 | **Rust Acceleration Layer**: **底层架构重写**。利用 Rust (PyO3) 彻底重写仿真调度器与内存管理模块，替换现有的 CTypes 胶水层，实现纳秒级互操作与零拷贝安全特性。 | 🏗️ 筹备中 |
-| **M8** | v3.0.0 | **GPU Empowerment (Outer-loop)**: 针对外层循环（校准/优化/不确定性分析）的 GPU 原生加速。将数万次串行仿真转化为 GPU 上的并行 Tensor 运算。 | 📅 规划中 |
-| **M9** | v4.0.0 | **AI Surrogate**: 内置图神经网络 (GNN) 代理模型精度校准，实现“预测-仿真”混合双驱。 | 📅 规划中 |
+| 里程碑       | 预估版本 | 核心目标                                                                                                                                         | 状态        |
+| :----------- | :------- | :----------------------------------------------------------------------------------------------------------------------------------------------- | :---------- |
+| **M7** | v2.3.0   | **Linear Solver Optimization**: **Cholesky 分解并行化**。引入高性能稀疏矩阵后端，攻克整体仿真中最后的 CPU 瓶颈。                     | 🏗️ 筹备中 |
+| **M8** | v3.0.0   | **Rust Acceleration Layer**: **底层架构重写**。利用 Rust (PyO3) 彻底重写仿真调度器与内存管理模块，替换现有的 CTypes 胶水层。         | 📅 规划中   |
+| **M8** | v4.0.0   | **GPU Empowerment (Outer-loop)**: 针对外层循环（校准/优化/不确定性分析）的 GPU 原生加速。将数万次串行仿真转化为 GPU 上的并行 Tensor 运算。 | 📅 规划中   |
+| **M9** | v5.0.0   | **AI Surrogate**: 内置图神经网络 (GNN) 代理模型精度校准，实现“预测-仿真”混合双驱。                                                       | 📅 规划中   |
 
 ---
 
@@ -95,13 +97,22 @@ Python 生态中水力模型处理通常受限于 Pandas 的单线程性能。EP
 
 **性能对比** (1000条规则模型):
 
-| 指标 | 优化前 | v2.1 优化后 | 提升 |
-|:-----|:-------|:------------|:-----|
-| Controls 占比 | 11.24% | **0.07%** | **↓ 160x** |
-| 规则评估次数 | 1,440,000 | **1,000** | **↓ 1440x** |
-| 跳过率 | 0% | **99.93%** | - |
+| 指标          | 优化前    | v2.1 优化后      | 提升               |
+| :------------ | :-------- | :--------------- | :----------------- |
+| Controls 占比 | 11.24%    | **0.07%**  | **↓ 160x**  |
+| 规则评估次数  | 1,440,000 | **1,000**  | **↓ 1440x** |
+| 跳过率        | 0%        | **99.93%** | -                  |
 
-> ⚠️ 此特性目前仅 Windows 平台可用，macOS/Linux 将在后续版本支持。
+### 5. 🎯 v2.2 新特性: 并行数值计算引擎 (Parallel Numerical Engine) *(Windows)*
+
+针对大规模管网（5万+节点）中耗时最长的计算环节进行了并行重构：
+
+- **并行水头损失 (Parallel Headloss)**: 利用 OpenMP 将数万个管段的水力特性计算分发至多核 CPU。
+- **并行矩阵组装 (Parallel Assembly)**:
+  - **Phase A (Bucket-Lock)**: 引入分段桶锁技术，解决了多个线程同时更新同一个节点 Aii/F 矩阵时的竞态问题。
+  - **数值确定性**: 与完全乱序的归约不同，此方案保证了计算结果的 **Bit-identical** (位一致性)，满足严苛的科学计算审计要求。
+
+> ⚠️ 注意：并行数值引擎与规则优化特性目前仅支持 **Windows x64** 平台。macOS/Linux 仍使用单线程高可靠模式运行。
 
 ---
 
@@ -109,13 +120,13 @@ Python 生态中水力模型处理通常受限于 Pandas 的单线程性能。EP
 
 > 测试环境: Intel Core i7-12700 (8P+4E), 32GB DDR4, NVMe SSD, Python 3.12 (Windows 11)
 
-| 场景 | 原版 WNTR/EPANET | EPANET-Turbo v2.0 | 加速比 |
-|:---|:---|:---|:---:|
-| **INP 加载 (40w节点)** | 45.20 秒 | **3.82 秒** | **11.8x** 🚀 |
-| **单次仿真耗时** | 8.50 秒 | **1.94 秒** | **4.4x** 🚀 |
-| **7天长周期仿真 (EPS)** | 352.00 秒 | **42.50 秒** | **8.2x** 🚀 |
-| **滚动预测 (100次)** | 850.00 秒 | **95.50 秒** | **8.9x** 🚀 |
-| **结果全量提取** | 内存溢出 (OOM) | **152 MB (稳定)** | **∞** (可行性突破) |
+| 场景                                  | 原版 WNTR/EPANET | EPANET-Turbo v2.2       |          加速比          |
+| :------------------------------------ | :--------------- | :---------------------- | :-----------------------: |
+| **INP 加载 (40w节点)**          | 45.20 秒         | **3.82 秒**       |    **11.8x** 🚀    |
+| **单线程水力求解 (4.7w节点)**   | 44.02 秒         | **42.10 秒**      |      **1.0x**      |
+| **16核并行水力求解 (4.7w节点)** | 44.02 秒         | **16.65 秒**      |     **2.6x** 🚀     |
+| **7天长周期仿真 (40w节点)**     | 352.00 秒        | **42.50 秒**      |     **8.2x** 🚀     |
+| **结果全量提取**                | 内存溢出 (OOM)   | **152 MB (稳定)** | **∞** (可行性突破) |
 
 > **注**: “7天长周期仿真” 指的是 8760 个时间步（1周 x 24小时 + 超精细水力步长）的全量模拟与结果回写测试。
 
@@ -125,22 +136,22 @@ Python 生态中水力模型处理通常受限于 Pandas 的单线程性能。EP
 
 ## 📂 项目结构 (Project Structure)
 
-| 目录/文件 | 说明 |
-| :--- | :--- |
-| **`epanet_turbo/`** | **Python 包核心** (Encrypted, Git Tracked) |
-| ├── `dll/` | **预编译内核**: 包含 `epanet2.dll` (Win), `libepanet2.dylib` (Mac), `libepanet2.so` (Linux) |
-| ├── `engine.py` | 底层驱动: 负责加载 DLL 并通过 CTypes 调用 C 函数 |
-| ├── `parser.py` | **Polars 解析器**: 极速读取 INP 文件 |
-| ├── `streaming.py` | 流式输出器: 实现 Protocol V2 二进制写出 |
-| **`resources/`** | **资源归档**: 原始二进制库备份与辅助文件 |
-| **`include/`** | **C 头文件**: 包含 `epanet2.h` 等开发所需的 API 定义 |
-| **`dev_tools/`** | **开发工具箱**: 构建脚本 (`make_release.py`) 与 CI/CD 工具 |
-| **`examples/`** | **开源示例 (Open Source)**: 供用户学习与复制 |
-| ├── `quickstart.py` | 基础功能演示 |
-| ├── `turbo_adapter.py` | **WNTR 适配器** (可直接复制到您项目中使用) |
-| ├── `demo_adapter.py` | WNTR 迁移演示脚本 |
-| └── `Net3.inp` | 示例管网文件 |
-| `pyproject.toml` | 项目配置文件 (依赖管理、元数据) |
+| 目录/文件                   | 说明                                                                                                    |
+| :-------------------------- | :------------------------------------------------------------------------------------------------------ |
+| **`epanet_turbo/`** | **Python 包核心** (Encrypted, Git Tracked)                                                        |
+| ├──`dll/`              | **预编译内核**: 包含 `epanet2.dll` (Win), `libepanet2.dylib` (Mac), `libepanet2.so` (Linux) |
+| ├──`engine.py`         | 底层驱动: 负责加载 DLL 并通过 CTypes 调用 C 函数                                                        |
+| ├──`parser.py`         | **Polars 解析器**: 极速读取 INP 文件                                                              |
+| ├──`streaming.py`      | 流式输出器: 实现 Protocol V2 二进制写出                                                                 |
+| **`resources/`**    | **资源归档**: 原始二进制库备份与辅助文件                                                          |
+| **`include/`**      | **C 头文件**: 包含 `epanet2.h` 等开发所需的 API 定义                                            |
+| **`dev_tools/`**    | **开发工具箱**: 构建脚本 (`make_release.py`) 与 CI/CD 工具                                      |
+| **`examples/`**     | **开源示例 (Open Source)**: 供用户学习与复制                                                      |
+| ├──`quickstart.py`     | 基础功能演示                                                                                            |
+| ├──`turbo_adapter.py`  | **WNTR 适配器** (可直接复制到您项目中使用)                                                        |
+| ├──`demo_adapter.py`   | WNTR 迁移演示脚本                                                                                       |
+| └──`Net3.inp`          | 示例管网文件                                                                                            |
+| `pyproject.toml`          | 项目配置文件 (依赖管理、元数据)                                                                         |
 
 ---
 
@@ -222,7 +233,7 @@ pip install epanet_turbo-2.0.0-py3-none-any.whl
 ```python
 import epanet_turbo
 print(f"Version: {epanet_turbo.__version__}")
-# 应输出: Version: 2.1.0
+# 应输出: Version: 2.2.0
 ```
 
 ### 4. Linux 部署特别说明
@@ -281,11 +292,11 @@ print("Simulation complete.")
 <br>
 <br>
 
-<a name="english"></a>
+`<a name="english"></a>`
 
 ---
 
-# 🇺🇸 EPANET-Turbo v2.0 (English Version)
+# 🇺🇸 EPANET-Turbo v2.2 (English Version)
 
 **EPANET-Turbo** is a high-performance hydraulic simulation engine tailored for **Ultra-Large Scale (100k-1M nodes)** water distribution networks. Built upon the **OWA-EPANET 2.3** kernel, it shatters performance bottlenecks through **OpenMP Parallelism**, **Polars Data Engine**, and **Batch APIs**.
 
@@ -302,23 +313,25 @@ v2.0 marks the completion of the **M6: Full Platform Native Support** milestone,
 
 ## 🏆 Milestones & Evolution
 
-| Milestone | Version | Key Achievement | Status |
-|:----------|:--------|:----------------|:-------|
-| **M1** | v0.1.0 | **OpenMP Genesis**: Introduced multi-threaded parallelism to the OWA core `hydsolver` for the first time. | ✅ Done |
-| **M2** | v1.0.0 | **Polars Integration**: Completely rebuilt the Python layer with Rust/Polars for 10x faster INP parsing. | ✅ Done |
-| **M3** | v1.1.0 | **Streaming Sink**: Implemented Protocol V1 streaming IO to solve OOM issues during long-duration EPS runs. | ✅ Done |
-| **M4** | v1.2.0 | **Open-Once**: Memory-resident handles eliminated 90% of initialization overhead for rolling predictions. | ✅ Done |
-| **M5** | v1.4.0 | **Unified Matrix**: Single CMake system generating both Serial and OpenMP binaries. | ✅ Done |
-| **M6** | v2.0.0 | **Native Platforms**: Unification of Windows, macOS (Apple Silicon), and Linux. | ✅ Done |
-| **M6-2** | v2.1.0 | **Rules Optimization** *(Windows)*: State-driven rule engine, 99.93% skip rate for 1000-rule models (controls overhead: 11% → 0.07%) | ✅ Done |
+| Milestone      | Version | Key Achievement                                                                                                                                                  | Status  |
+| :------------- | :------ | :--------------------------------------------------------------------------------------------------------------------------------------------------------------- | :------ |
+| **M1**   | v0.1.0  | **OpenMP Genesis**: Introduced multi-threaded parallelism to the OWA core `hydsolver` for the first time.                                                | ✅ Done |
+| **M2**   | v1.0.0  | **Polars Integration**: Completely rebuilt the Python layer with Rust/Polars for 10x faster INP parsing.                                                   | ✅ Done |
+| **M3**   | v1.1.0  | **Streaming Sink**: Implemented Protocol V1 streaming IO to solve OOM issues during long-duration EPS runs.                                                | ✅ Done |
+| **M4**   | v1.2.0  | **Open-Once**: Memory-resident handles eliminated 90% of initialization overhead for rolling predictions.                                                  | ✅ Done |
+| **M5**   | v1.4.0  | **Unified Matrix**: Single CMake system generating both Serial and OpenMP binaries.                                                                        | ✅ Done |
+| **M6**   | v2.0.0  | **Native Platforms**: Unification of Windows, macOS (Apple Silicon), and Linux.                                                                            | ✅ Done |
+| **M6-2** | v2.1.0  | **Rules Optimization** *(Windows)*: State-driven rule engine, 99.93% skip rate for 1000-rule models                                                      | ✅ Done |
+| **M6-3** | v2.2.0  | **Parallel Numerical Engine** *(Windows)*: Implemented OpenMP Headloss and Bucket-Lock Assembly. 2.6x speedup (16-core) with 100% bit-identical results. | ✅ Done |
 
 ### 🔮 Future Blueprint
 
-| Milestone | Target | Core Objective | Status |
-|:----------|:-------|:---------------|:-------|
-| **M7** | v2.2.0 | **Rust Acceleration Layer**: **Underlying Architecture Rewrite**. Completely rewriting the simulation scheduler and memory management in Rust (PyO3) to replace CTypes, achieving nanosecond interoperability. | 🏗️ Planned |
-| **M8** | v3.0.0 | **GPU Empowerment (Outer-loop)**: Accelerating the "Outer-loop" (Calibration, Optimization) directly on GPUs. Transforming 10k serial runs into parallel tensor operations. | 📅 Future |
-| **M9** | v4.0.0 | **AI Surrogate**: Built-in Graph Neural Network (GNN) calibration and hybrid "Prediction-Simulation" drivers. | 📅 Future |
+| Milestone    | Target | Core Objective                                                                                                                                                                    | Status       |
+| :----------- | :----- | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :----------- |
+| **M7** | v2.3.0 | **Linear Solver Optimization**: **Parallel Cholesky Decomposition**. Targeting the final CPU bottleneck in hydraulic solver.                                          | 🏗️ Planned |
+| **M8** | v3.0.0 | **Rust Acceleration Layer**: **Underlying Architecture Rewrite**. Using PyO3/Rust to replace CTypes glue layer for nanosecond interoperability.                       | 📅 Future    |
+| **M8** | v3.0.0 | **GPU Empowerment (Outer-loop)**: Accelerating the "Outer-loop" (Calibration, Optimization) directly on GPUs. Transforming 10k serial runs into parallel tensor operations. | 📅 Future    |
+| **M9** | v4.0.0 | **AI Surrogate**: Built-in Graph Neural Network (GNN) calibration and hybrid "Prediction-Simulation" drivers.                                                               | 📅 Future    |
 
 ---
 
@@ -338,23 +351,15 @@ By leveraging **Polars** (written in Rust), we bypass the Python GIL and Pandas 
 Traditional Python loops for parameter adjustment invoke CTypes overhead thousands of times.
 The **Batch API** allows injecting millions of parameter changes (e.g., node demands, pipe roughness) in a **single O(1) call**.
 
-### 4. 🎯 v2.1: State-Driven Rule Engine *(Windows)*
+### 4. 🎯 v2.2: Parallel Numerical Engine *(Windows)*
 
-For models with many control rules, rule evaluation can consume 10-20% of simulation time. v2.1 introduces **state-driven skipping**:
+Focused on parallelizing the most time-consuming calculation blocks for large-scale networks:
 
-- **Dependency Tracking**: Each rule's dependencies are analyzed at compile time.
-- **Generation Marking**: After hydraulic solving, only changed elements are marked.
-- **Smart Skipping**: Rules are skipped if their dependencies haven't changed.
+- **Parallel Headloss**: Distributes hydraulic property calculations for 100k+ links across multiple CPU cores.
+- **Parallel Assembly (Bucket-Lock)**: Solves Aii/F matrix update contention using a fine-grained locking strategy.
+- **Bit-identical**: Unlike chaotic reduction, this approach ensures identical results compared to serial runs, maintaining mathematical precision.
 
-**Performance** (1000-rule model):
-
-| Metric | Before | v2.1 | Improvement |
-|:-------|:-------|:-----|:------------|
-| Controls % | 11.24% | **0.07%** | **↓ 160x** |
-| Evaluations | 1,440,000 | **1,000** | **↓ 1440x** |
-| Skip Rate | 0% | **99.93%** | - |
-
-> ⚠️ Currently Windows only. macOS/Linux support coming in future releases.
+> ⚠️ **Note**: Parallel numerical optimization features are currently **Windows x64 only**.
 
 ---
 
@@ -362,29 +367,29 @@ For models with many control rules, rule evaluation can consume 10-20% of simula
 
 > Env: Intel i7-12700, 32GB RAM, Windows 11
 
-| Metric | Original WNTR | EPANET-Turbo v2.0 | Speedup |
-|:---|:---|:---|:---:|
-| **Load INP (440k nodes)** | 45.20 s | **3.82 s** | **11.8x** 🚀 |
-| **Single Run** | 8.50 s | **1.94 s** | **4.4x** 🚀 |
-| **7-Day EPS Run** | 352.00 s | **42.50 s** | **8.2x** 🚀 |
-| **Rolling Forecast (100 runs)** | 850.00 s | **95.50 s** | **8.9x** 🚀 |
-| **Peak Memory** | OOM (Crash) | **152 MB** | **Stable** |
+| Metric                             | Original WNTR | EPANET-Turbo v2.2 |      Speedup      |
+| :--------------------------------- | :------------ | :---------------- | :----------------: |
+| **Load INP (440k nodes)**    | 45.20 s       | **3.82 s**  | **11.8x** 🚀 |
+| **Serial Solve (47k links)** | 44.02 s       | **42.10 s** |   **1.0x**   |
+| **Parallel (16-core)**       | 44.02 s       | **16.65 s** | **2.6x** 🚀 |
+| **7-Day EPS Run**            | 352.00 s      | **42.50 s** | **8.2x** 🚀 |
+| **Peak Memory**              | OOM           | **152 MB**  |  **Stable**  |
 
 ---
 
 ## 📂 Project Structure
 
-| Path | Description |
-| :--- | :--- |
-| **`epanet_turbo/`** | **Core Package** (Encrypted, Git Tracked) |
-| ├── `dll/` | **Kernels**: `epanet2.dll` (Win), `libepanet2.dylib` (Mac), `libepanet2.so` (Linux) |
-| ├── `engine.py` | Driver: Handles DLL loading and CTypes mapping |
-| ├── `parser.py` | **Polars Parser**: Ultra-fast INP reader |
-| ├── `streaming.py` | Streaming Output: Protocol V2 implementation |
-| **`resources/`** | **Archives**: Legacy binaries & assets |
-| **`include/`** | **Headers**: Public C API definitions (`epanet2.h`) |
-| **`dev_tools/`** | **Dev Toolkit**: Build scripts (`make_release.py`) & CI utils |
-| `pyproject.toml` | Config: Dependencies & Metadata |
+| Path                        | Description                                                                                     |
+| :-------------------------- | :---------------------------------------------------------------------------------------------- |
+| **`epanet_turbo/`** | **Core Package** (Encrypted, Git Tracked)                                                 |
+| ├──`dll/`              | **Kernels**: `epanet2.dll` (Win), `libepanet2.dylib` (Mac), `libepanet2.so` (Linux) |
+| ├──`engine.py`         | Driver: Handles DLL loading and CTypes mapping                                                  |
+| ├──`parser.py`         | **Polars Parser**: Ultra-fast INP reader                                                  |
+| ├──`streaming.py`      | Streaming Output: Protocol V2 implementation                                                    |
+| **`resources/`**    | **Archives**: Legacy binaries & assets                                                    |
+| **`include/`**      | **Headers**: Public C API definitions (`epanet2.h`)                                     |
+| **`dev_tools/`**    | **Dev Toolkit**: Build scripts (`make_release.py`) & CI utils                           |
+| `pyproject.toml`          | Config: Dependencies & Metadata                                                                 |
 
 ---
 
@@ -439,7 +444,7 @@ python setup_and_demo.py
 **Manual (Wheel)**:
 
 ```bash
-pip install epanet_turbo-2.1.0-py3-none-any.whl
+pip install epanet_turbo-2.2.0-py3-none-any.whl
 ```
 
 ### 3. Verify Installation
@@ -447,7 +452,7 @@ pip install epanet_turbo-2.1.0-py3-none-any.whl
 ```python
 import epanet_turbo
 print(f"Version: {epanet_turbo.__version__}")
-# Windows: Should print Version: 2.1.0
+# Windows: Should print Version: 2.2.0
 # Linux: If "OSError: libepanet2.so not found", check LD_LIBRARY_PATH
 ```
 
