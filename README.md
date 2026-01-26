@@ -307,7 +307,7 @@ print("Simulation complete.")
 
 ---
 
-# 🇺🇸 EPANET-Turbo v2.2 (English Version)
+# 🇺🇸 EPANET-Turbo v2.3 (English Version)
 
 **EPANET-Turbo** is a high-performance hydraulic simulation engine tailored for **Ultra-Large Scale (100k-1M nodes)** water distribution networks. Built upon the **OWA-EPANET 2.3** kernel, it shatters performance bottlenecks through **OpenMP Parallelism**, **Polars Data Engine**, and **Batch APIs**.
 
@@ -341,8 +341,20 @@ v2.0 marks the completion of the **M6: Full Platform Native Support** milestone,
 | :----------- | :----- | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :----------- |
 | **M7** | v2.3.0 | **Linear Solver Optimization**: **Parallel Cholesky Decomposition**. Targeting the final CPU bottleneck in hydraulic solver.                                          | 🏗️ Planned |
 | **M8** | v3.0.0 | **Rust Acceleration Layer**: **Underlying Architecture Rewrite**. Using PyO3/Rust to replace CTypes glue layer for nanosecond interoperability.                       | 📅 Future    |
-| **M8** | v4.0.0 | **GPU Empowerment (Outer-loop)**: Accelerating the "Outer-loop" (Calibration, Optimization) directly on GPUs. Transforming 10k serial runs into parallel tensor operations. | 📅 Future    |
-| **M9** | v5.0.0 | **AI Surrogate**: Built-in Graph Neural Network (GNN) calibration and hybrid "Prediction-Simulation" drivers.                                                               | 📅 Future    |
+| **M9** | v4.0.0 | **GPU Empowerment (Outer-loop)**: Accelerating the "Outer-loop" (Calibration, Optimization) directly on GPUs. Transforming 10k serial runs into parallel tensor operations. | 📅 Future    |
+| **M10** | v5.0.0 | **AI Surrogate**: Built-in Graph Neural Network (GNN) calibration and hybrid "Prediction-Simulation" drivers.                                                               | 📅 Future    |
+
+...
+
+### 5. 🎯 v2.3 (M7): Targeted Adaptive Relaxation *(Windows)*
+
+Addressed the "Long-tail Oscillation" issue common in large-scale models with coupled hydraulics:
+
+- **Oscillation Detection**: Monitors error gradients in real-time. Triggers when iterations > 10 and error diverges.
+- **Aggressive Damping**: Automatically applies `RelaxFactor = 0.5` to break numerical cycles instantly.
+- **Result**: Reduced average iterations from 5.3 to 1.01 on difficult models, achieving a **2.8x** overall speedup.
+
+> ⚠️ **Note**: Parallel numerical optimization features are currently **Windows x64 only**.
 
 ---
 
