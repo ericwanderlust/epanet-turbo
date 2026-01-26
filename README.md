@@ -202,9 +202,9 @@ EPANET-Turbo 与 OWA-EPANET **100% 兼容**。
 - **[Output Format / 输出格式](OUTPUT_FORMAT.md)**:
   - Detailed explanation of the Protocol V2 binary output format.
   - Protocol V2 二进制输出格式的详细说明。
-- **[Release Notes / 版本说明](RELEASE_NOTES_v2.0.md)**:
-  - Change log and new features for v2.0.0.
-  - v2.0.0 版本的更新日志与新特性。
+- **[Release Notes / 版本说明](RELEASE_NOTES_v2.3.0.md)**:
+  - Change log and new features for v2.3.0.
+  - v2.3.0 版本的更新日志与新特性。
 
 ---
 
