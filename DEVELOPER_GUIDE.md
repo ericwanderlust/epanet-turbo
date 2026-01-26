@@ -1,4 +1,4 @@
-# 📘 EPANET-Turbo v2.0.0 Developer Manual / 开发者手册
+# 📘 EPANET-Turbo v2.3.0 Developer Manual / 开发者手册
 
 > **High-Performance Water Distribution Network Simulation Engine**
 > **高性能供水管网模拟引擎**
@@ -12,10 +12,11 @@ Standard EPANET/WNTR workflows suffer from **Single-Threaded Bottlenecks** and *
 
 ### 🚀 Performance Benchmarks (性能指标)
 
-| Metric (指标)          | Standard WNTR / EPANET | **EPANET-Turbo 2.0**  | Improvement (提升)        |
+| Metric (指标)          | Standard WNTR / EPANET | **EPANET-Turbo 2.3**  | Improvement (提升)        |
 | :--------------------- | :--------------------- | :-------------------------- | :------------------------ |
 | **Parsing (IO)** | 45s (Large Network)    | **< 0.8s**            | **50x Faster**      |
 | **Simulation**   | Serial (1 Core)        | **Parallel (OpenMP)** | **5x - 10x Faster** | (Windows/Mac/Linux) |
+| **Connectivity** | 403s (400k Nodes)      | **Targeted Relaxation** | **142s (2.8x Faster)** | (Windows M7 Optimized) |
 | **Data Access**  | Slow Python Objects    | **Zero-Copy Polars**  | **100x Faster**     |
 
 ### 💡 Technology Stack (技术原理)
@@ -28,7 +29,11 @@ Standard EPANET/WNTR workflows suffer from **Single-Threaded Bottlenecks** and *
 
    * **EN**: Instead of heavy Pandas objects, we use **Rust-based Polars**. It maps the INP file directly into memory (`mmap`) for instant access without parsing overhead.
    * **CN**: 我们放弃了沉重的 Pandas 对象，转而使用基于 Rust 的 **Polars**。它将 INP 文件直接映射到内存 (`mmap`)，实现零开销即时访问。
-3. **Zero-Copy Bridge (零拷贝桥接)**:
+3. **Adaptive Relaxation (自适应松弛)** (New in v2.3):
+
+   * **EN**: Smart logic detects oscillation in hydraulic iterations and applies targeted damping. Solves "Long Tail" convergence issues instantly.
+   * **CN**: 智能逻辑自动检测水力迭代中的震荡，并应用目标阻尼。瞬间解决“长尾”收敛问题。
+4. **Zero-Copy Bridge (零拷贝桥接)**:
 
    * **EN**: Simulation results are written directly to binary buffers readable by Python, eliminating the expensive "C++ -> Python Object" conversion cost.
    * **CN**: 模拟结果直接写入 Python 可读的二进制缓冲区，消除了昂贵的“C++ 到 Python 对象”的转换开销。

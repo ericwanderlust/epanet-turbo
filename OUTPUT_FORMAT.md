@@ -111,6 +111,7 @@ print(f"Time: {res.times[24]}s, Node: {node_ids[0]}, P: {p_val:.2f}")
 
 | 版本 | 协议 | 关键变更 |
 | :--- | :--- | :--- |
+| **v2.3** | **V2** | 无格式变更 (M7 仅优化内部求解器)。 |
 | **v2.0** | **V2** | 数据边界对齐优化；强化 Meta JSON 字段；支持 Unix Timestamp。 |
 | v1.3 | V1 | 引入分离式 Header+Body 二进制设计。 |
 | v1.0 | V0 | 初始版本 (基于 NPY)。 |
