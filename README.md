@@ -148,7 +148,7 @@ Python 生态中水力模型处理通常受限于 Pandas 的单线程性能。EP
 
 | 目录/文件                   | 说明                                                                                                    |
 | :-------------------------- | :------------------------------------------------------------------------------------------------------ |
-| **`epanet_turbo/`** | **Python 包核心** (Encrypted, Git Tracked)                                                        |
+| **`src/epanet_turbo/`** | **Python 包源码** (Core Package Source)                                                           |
 | ├──`dll/`              | **预编译内核**: 包含 `epanet2.dll` (Win), `libepanet2.dylib` (Mac), `libepanet2.so` (Linux) |
 | ├──`engine.py`         | 底层驱动: 负责加载 DLL 并通过 CTypes 调用 C 函数                                                        |
 | ├──`parser.py`         | **Polars 解析器**: 极速读取 INP 文件                                                              |
@@ -162,6 +162,7 @@ Python 生态中水力模型处理通常受限于 Pandas 的单线程性能。EP
 | ├──`demo_adapter.py`   | WNTR 迁移演示脚本                                                                                       |
 | └──`Net3.inp`          | 示例管网文件                                                                                            |
 | `pyproject.toml`          | 项目配置文件 (依赖管理、元数据)                                                                         |
+| `setup_and_demo.py`       | **一键安装验证脚本**: 自动配置环境并运行测试                                                      |
 
 ---
 
@@ -454,7 +455,7 @@ python setup_and_demo.py
 **Manual (Wheel)**:
 
 ```bash
-pip install epanet_turbo-2.2.0-py3-none-any.whl
+pip install epanet_turbo-2.3.0-py3-none-any.whl
 ```
 
 ### 3. Verify Installation
@@ -462,7 +463,7 @@ pip install epanet_turbo-2.2.0-py3-none-any.whl
 ```python
 import epanet_turbo
 print(f"Version: {epanet_turbo.__version__}")
-# Windows: Should print Version: 2.2.0
+# Windows: Should print Version: 2.3.0
 # Linux: If "OSError: libepanet2.so not found", check LD_LIBRARY_PATH
 ```
 
