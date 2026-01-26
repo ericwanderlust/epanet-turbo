@@ -6,7 +6,7 @@ import codecs
 
 # Configuration
 import time
-VERSION = "2.1.0"
+VERSION = "2.3.0"
 SRC_DIR = "src"
 # Use a timestamp to avoid "File in use" errors on Windows
 BUILD_SRC_DIR = f"build_src_{int(time.time())}"

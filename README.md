@@ -4,7 +4,7 @@
 
 ### 极速水力计算引擎 | High-Performance Hydraulic Engine
 
-[![Version](https://img.shields.io/badge/Version-v2.2.0-blue.svg)](https://github.com/ericwanderlust/epanet-turbo/releases)
+[![Version](https://img.shields.io/badge/Version-v2.3.0-blue.svg)](https://github.com/ericwanderlust/epanet-turbo/releases)
 [![Platform](https://img.shields.io/badge/Platform-Windows%20(Parallel)%20%7C%20Mac%20%7C%20Linux-blueviolet.svg)]()
 [![Python](https://img.shields.io/badge/Python-3.10%20%7C%203.11%20%7C%203.12-blue.svg)](https://pypi.org)
 [![License](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
@@ -21,7 +21,9 @@
 
 **EPANET-Turbo** 是专为**超大规模（10万-100万节点）**供水管网模型打造的高性能水力计算引擎。它基于行业标准的 **OWA-EPANET 2.3** 内核进行深度重构，通过引入 **OpenMP 并行计算**、**Rust (Polars) 极速数据层** 以及 **Batch API 批量接口**，解决了传统 EPANET/WNTR 在处理城市级全要素模型时的性能瓶颈。
 
-v2.0 版本标志着 **M6 (全平台原生支持)** 里程碑的完成，正式实现了 **Windows、macOS (Apple Silicon/Intel) 与 Linux** 的全平台统一。无论是 Mac Studio 还是云端 Linux 集群，都能获得一致的极致计算体验。
+v2.0 版本标志着 **M6 (全平台原生支持)** 里程碑的完成，正式实现了 **Windows、macOS (Apple Silicon/Intel) 与 Linux** 的全平台统一。
+
+**v2.3 (M7)** 版本引入了 **Targeted Adaptive Relaxation**，彻底解决了大模型非线性迭代震荡的难题。
 
 ### 🚀 核心价值
 
@@ -46,6 +48,7 @@ v2.0 版本标志着 **M6 (全平台原生支持)** 里程碑的完成，正式�
 | **M6**   | v2.0.0 | **原生全平台**: Windows / macOS / Linux 全适配                                                                                    | ✅ 完成 |
 | **M6-2** | v2.1.0 | **Rules Optimization** *(Windows)*: 规则引擎状态驱动优化，1000规则模型 controls 占比从 11% 降到 0.07%，跳过率 99.93%            | ✅ 完成 |
 | **M6-3** | v2.2.0 | **Parallel Numerical Engine** *(Windows)*: 实现并行水头损失计算与分段锁矩阵组装，加速比提升至 2.6x (16核)，保持 100% 数值确定性 | ✅ 完成 |
+| **M7**   | v2.3.0 | **Convergence Optimization** *(Windows)*: **目标自适应松弛**。解决长尾震荡，**2.8倍** 提速大模型求解（40w节点 403s -> 142s）。  | ✅ 完成 |
 
 ### 🔮 未来蓝图 (Future Blueprint)
 
@@ -53,8 +56,7 @@ v2.0 版本标志着 **M6 (全平台原生支持)** 里程碑的完成，正式�
 
 | 里程碑       | 预估版本 | 核心目标                                                                                                                                         | 状态        |
 | :----------- | :------- | :----------------------------------------------------------------------------------------------------------------------------------------------- | :---------- |
-| **M7** | v2.3.0   | **Linear Solver Optimization**: **Cholesky 分解并行化**。引入高性能稀疏矩阵后端，攻克整体仿真中最后的 CPU 瓶颈。                     | 🏗️ 筹备中 |
-| **M8** | v3.0.0   | **Rust Acceleration Layer**: **底层架构重写**。利用 Rust (PyO3) 彻底重写仿真调度器与内存管理模块，替换现有的 CTypes 胶水层。         | 📅 规划中   |
+| **M8** | v3.0.0   | **Rust Acceleration Layer**: **底层架构重写**。利用 Rust (PyO3) 彻底重写仿真调度器与内存管理模块，替换现有的 CTypes 胶水层。         | 🚧 开发中   |
 | **M8** | v4.0.0   | **GPU Empowerment (Outer-loop)**: 针对外层循环（校准/优化/不确定性分析）的 GPU 原生加速。将数万次串行仿真转化为 GPU 上的并行 Tensor 运算。 | 📅 规划中   |
 | **M9** | v5.0.0   | **AI Surrogate**: 内置图神经网络 (GNN) 代理模型精度校准，实现“预测-仿真”混合双驱。                                                       | 📅 规划中   |
 

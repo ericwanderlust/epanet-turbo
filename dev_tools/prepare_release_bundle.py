@@ -4,7 +4,7 @@ import glob
 import sys
 
 # Configuration
-VERSION = "2.2.0"
+VERSION = "2.3.0"
 OUTPUT_ROOT = "Releases"
 RELEASE_DIR = os.path.join(OUTPUT_ROOT, f"EPANET-Turbo_v{VERSION}_Release")
 DIST_DIR = "dist"
