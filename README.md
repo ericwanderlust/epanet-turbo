@@ -12,7 +12,7 @@ EPANET-Turbo 是基于 OWA-EPANET 2.3 的水力计算引擎；本次构建的 `E
 | Linux | x64 / x86_64 | `libepanet2-linux-x64.so` | OrbStack x86_64 Linux：WNTR 1.4.0、Python 3.11 和 Net1 已对照验证 |
 | macOS | arm64 / Apple Silicon | `libepanet2-macos-arm64.dylib` | WNTR 1.4.0、Python 3.12 和 Net1 已对照验证 |
 
-Linux 库构建于 Debian 12、glibc 2.36 环境。当前没有 Windows ARM64、Linux ARM64 或 Intel Mac 的预览构建。下载库时请同时查看 Release 中的 `LICENSES.txt`。
+Linux 库构建于 Debian 12、glibc 2.36 环境。macOS 库的部署目标为 macOS 11.0，实际测试环境为 macOS 27.0.1；较旧系统尚未实测。当前没有 Windows ARM64、Linux ARM64 或 Intel Mac 的预览构建。下载库时请同时查看 Release 中的 `LICENSES.txt`。
 
 这些文件是原生库，供已有 EPANET 或 WNTR 集成使用，不是 Python wheel。上一版包含 wheel 的集成发布仍可在 [v2.8.0](https://github.com/ericwanderlust/epanet-turbo/releases/tag/v2.8.0) 找到。当前公开仓库未包含与本次二进制完全对应的 C 构建源码；Release 标签对应本仓库的文档和 WNTR 适配代码。
 
@@ -59,7 +59,7 @@ macOS 和 OrbStack Linux 的 Net1 对照均覆盖 24 小时、25 个报告时刻
 
 ## English
 
-The [v2.8.1-preview.1 release](https://github.com/ericwanderlust/epanet-turbo/releases/tag/v2.8.1-preview.1) distributes separate native libraries for **Windows x64**, **Linux x64**, and **macOS arm64**. Windows is cross-compiled and awaits a Windows runtime test. The Linux build uses Debian 12 / glibc 2.36. The macOS and emulated Linux x64 builds have been compared with WNTR 1.4.0's EPANET 2.2 on Net1. Windows ARM64, Linux ARM64, and Intel macOS binaries are not included.
+The [v2.8.1-preview.1 release](https://github.com/ericwanderlust/epanet-turbo/releases/tag/v2.8.1-preview.1) distributes separate native libraries for **Windows x64**, **Linux x64**, and **macOS arm64**. Windows is cross-compiled and awaits a Windows runtime test. The Linux build uses Debian 12 / glibc 2.36. The macOS deployment target is 11.0; runtime testing was performed on macOS 27.0.1. The macOS and emulated Linux x64 builds have been compared with WNTR 1.4.0's EPANET 2.2 on Net1. Windows ARM64, Linux ARM64, and Intel macOS binaries are not included.
 
 For WNTR, copy [examples/turbo_adapter.py](examples/turbo_adapter.py) into your project and pass the downloaded library path to `TurboSimulator`. Run it in a process without concurrent WNTR simulations; the adapter temporarily selects a process-wide toolkit class. The underlying engine reports EPANET 2.3. The preview retains Turbo's adaptive relaxation and uses the built-in solver with OpenMP disabled and does not enable CHOLMOD takeover. The release contains native libraries, not a Python wheel. The matching C build source is not included in this public repository.
 
