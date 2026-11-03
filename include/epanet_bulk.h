@@ -17,8 +17,7 @@ extern "C" {
 API int EN_get_counts(void *ph, int *n_nodes, int *n_links);
 
 /* Bulk extraction helpers
-   - ph: pass EN_Project for the 2.3 project API; define EPANET_USE_GLOBAL_API
-   for the 2.2 global API
+   - ph: pass EN_Project for the 2.2 or 2.3 project API
    - n_nodes/n_links: capacity of the caller-provided buffer (must be >= actual
    count) or 202 is returned
    - pressureCode/flowCode: EN_PRESSURE, EN_FLOW, etc.
