@@ -1,0 +1,57 @@
+name: Windows EPANET 2.2 and 2.3 bulk compatibility
+on:
+  push:
+    branches:
+      - codex/bulk22-auto-20261103
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  test:
+    runs-on: windows-2022
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ['3.11', '3.12']
+    env:
+      OMP_NUM_THREADS: '1'
+      OPENBLAS_NUM_THREADS: '1'
+      MPLBACKEND: Agg
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+          architecture: x64
+      - name: Extract encrypted candidates
+        shell: pwsh
+        run: |
+          Expand-Archive validation/bulk22-windows-candidate.zip "$env:RUNNER_TEMP\bulk22"
+          Expand-Archive validation/bulk23-windows-candidate.zip "$env:RUNNER_TEMP\bulk23"
+      - name: Install dependencies
+        shell: pwsh
+        run: python -m pip install -r "$env:RUNNER_TEMP\bulk22\requirements.txt"
+      - name: Verify both encrypted helpers and automatic detection
+        shell: pwsh
+        run: |
+          $tag = 'cp' + ('${{ matrix.python-version }}' -replace '\.', '')
+          foreach ($core in @('bulk22', 'bulk23')) {
+            python validation/verify_bulk_auto.py --module-dir "$env:RUNNER_TEMP\$core\python\$tag" --lib22 "$env:RUNNER_TEMP\bulk22\native\windows_x86_64\epanet2.dll" --lib23 "$env:RUNNER_TEMP\bulk23\epanet2.dll" --inp examples/Net2.inp --output "$env:GITHUB_WORKSPACE\auto-$core.json"
+            if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          }
+      - name: Verify WNTR and friction output compatibility
+        shell: pwsh
+        run: |
+          python examples/verify_friction_precision.py --bundle "$env:RUNNER_TEMP\bulk22" --inp examples/Net2.inp --output friction.json
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          python examples/wntr_turbo_demo.py --bundle "$env:RUNNER_TEMP\bulk22" --inp examples/Net2.inp --output-dir "$env:RUNNER_TEMP\wntr-demo" --threads 1
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: bulk-compat-windows-${{ matrix.python-version }}
+          path: |
+            auto-bulk22.json
+            auto-bulk23.json
+            friction.json
+          if-no-files-found: warn
