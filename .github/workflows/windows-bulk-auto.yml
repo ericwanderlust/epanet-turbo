@@ -28,6 +28,14 @@ jobs:
         run: |
           Expand-Archive validation/bulk22-windows-candidate.zip "$env:RUNNER_TEMP\bulk22"
           Expand-Archive validation/bulk23-windows-candidate.zip "$env:RUNNER_TEMP\bulk23"
+      - name: Download old 2.3 release for multiplier regression
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release download v2.8.1-preview.2 --repo ericwanderlust/epanet-turbo --pattern 'epanet-turbo-v2.8.1-preview.2-epanet23-windows-x64.zip' --output "$env:RUNNER_TEMP\old23.zip"
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          Expand-Archive "$env:RUNNER_TEMP\old23.zip" "$env:RUNNER_TEMP\old23"
       - name: Install dependencies
         shell: pwsh
         run: python -m pip install -r "$env:RUNNER_TEMP\bulk22\requirements.txt"
@@ -39,6 +47,12 @@ jobs:
             python validation/verify_bulk_auto.py --module-dir "$env:RUNNER_TEMP\$core\python\$tag" --lib22 "$env:RUNNER_TEMP\bulk22\native\windows_x86_64\epanet2.dll" --lib23 "$env:RUNNER_TEMP\bulk23\epanet2.dll" --inp examples/Net2.inp --output "$env:GITHUB_WORKSPACE\auto-$core.json"
             if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           }
+      - name: Verify automatic multiplier avoids the old 2.3 bug
+        shell: pwsh
+        run: |
+          $tag = 'cp' + ('${{ matrix.python-version }}' -replace '\.', '')
+          python validation/verify_legacy_multiplier.py --module-dir "$env:RUNNER_TEMP\bulk22\python\$tag" --library "$env:RUNNER_TEMP\old23\epanet2.dll" --inp examples/Net2.inp --output "$env:GITHUB_WORKSPACE\legacy23.json"
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
       - name: Verify WNTR and friction output compatibility
         shell: pwsh
         run: |
@@ -54,4 +68,5 @@ jobs:
             auto-bulk22.json
             auto-bulk23.json
             friction.json
+            legacy23.json
           if-no-files-found: warn

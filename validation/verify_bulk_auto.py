@@ -111,7 +111,7 @@ def check_case(label, library_path, expected_version, expected_modes, directory,
             dll_dir.close()
 
 
-turbo = {'node_read':'turbo_bulk','link_read':'turbo_bulk','node_write':'turbo_bulk','link_write':'turbo_bulk','demand_multiplier':'turbo'}
+turbo = {'node_read':'turbo_bulk','link_read':'turbo_bulk','node_write':'turbo_bulk','link_write':'turbo_bulk','demand_multiplier':'epanet'}
 scalar = {'node_read':'scalar','link_read':'scalar','node_write':'scalar','link_write':'scalar','demand_multiplier':'epanet'}
 standard = {'node_read':'epanet_bulk','link_read':'epanet_bulk','node_write':'scalar','link_write':'scalar','demand_multiplier':'epanet'}
 with tempfile.TemporaryDirectory(prefix='bulk-auto-test-', dir=Path(args.output).resolve().parent) as temp:
