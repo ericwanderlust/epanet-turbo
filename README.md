@@ -1,6 +1,10 @@
 # EPANET-Turbo
 
-EPANET-Turbo 提供加速的 EPANET 原生水力引擎。当前 [v2.8.1-preview.2 性能预览](https://github.com/ericwanderlust/epanet-turbo/releases/tag/v2.8.1-preview.2) 按操作系统、CPU 架构和 EPANET 内核分别提供下载包，供开发者验证自己的模型和集成。
+> **严重问题：** 2.3 版的 `ENT_set_demand_multiplier` 会错误地修改相对黏度，而非需水倍率，并可能返回成功。请勿调用；可改用 `EN_setoption(project, EN_DEMANDMULT, factor)`，并重新验证使用此接口得到的工况结果。macOS arm64 和仿真 Linux x64 已复现，Windows 由同一实现构建。2.2 兼容包不导出此接口。
+>
+> **Critical:** The 2.3 `ENT_set_demand_multiplier` changes relative viscosity instead of the demand multiplier and can return success. Do not use it; revalidate affected scenarios.
+
+EPANET-Turbo 探索 EPANET 原生水力性能优化。[v2.8.1-preview.2](https://github.com/ericwanderlust/epanet-turbo/releases/tag/v2.8.1-preview.2) 仅在一个模型上测得小幅加速，尚未证明在其他模型或 Windows / Linux 实机上有显著性能优势；其 2.3 批量需水接口存在上面的错误。下载包按操作系统、CPU 架构和 EPANET 内核分别提供。
 
 ## 选择内核和平台
 
