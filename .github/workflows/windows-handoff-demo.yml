@@ -1,0 +1,47 @@
+name: Windows release integration examples
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - codex/handoff-demos-20261103
+permissions:
+  contents: read
+jobs:
+  examples:
+    runs-on: windows-2022
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ['3.11', '3.12']
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+          architecture: x64
+      - name: Download the published Windows packages
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          $asset22 = 'epanet-turbo-v2.8.1-preview.5-epanet22-compat-encrypted-windows-x64.zip'
+          $asset23 = 'epanet-turbo-v2.8.1-preview.5-epanet23-windows-x64.zip'
+          gh release download v2.8.1-preview.5 --repo ericwanderlust/epanet-turbo --pattern $asset22 --output "$env:RUNNER_TEMP\epanet22.zip"
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          gh release download v2.8.1-preview.5 --repo ericwanderlust/epanet-turbo --pattern $asset23 --output "$env:RUNNER_TEMP\epanet23.zip"
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          Expand-Archive "$env:RUNNER_TEMP\epanet22.zip" "$env:RUNNER_TEMP\epanet22"
+          Expand-Archive "$env:RUNNER_TEMP\epanet23.zip" "$env:RUNNER_TEMP\epanet23"
+      - name: Install WNTR dependencies
+        shell: pwsh
+        run: python -m pip install -r "$env:RUNNER_TEMP\epanet22\requirements.txt"
+      - name: Run encrypted WNTR example
+        shell: pwsh
+        run: |
+          python handoff/wntr_turbo_demo.py --bundle "$env:RUNNER_TEMP\epanet22" --inp examples/Net2.inp --output-dir "$env:RUNNER_TEMP\wntr-demo" --threads 1
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: Run bulk and scenario examples
+        shell: pwsh
+        run: |
+          python handoff/epanet23_bulk_demo.py --library "$env:RUNNER_TEMP\epanet23\epanet2.dll" --inp examples/Net2.inp --node 2 --node 3 --pipe 1 --pipe 2 --node-factor 1.01 --pipe-factor 1.01 --factors 0.9 1.0 1.1 0.9 --threads 1
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
