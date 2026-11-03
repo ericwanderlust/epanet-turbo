@@ -53,6 +53,13 @@ jobs:
           $tag = 'cp' + ('${{ matrix.python-version }}' -replace '\.', '')
           python validation/verify_legacy_multiplier.py --module-dir "$env:RUNNER_TEMP\bulk22\python\$tag" --library "$env:RUNNER_TEMP\old23\epanet2.dll" --inp examples/Net2.inp --output "$env:GITHUB_WORKSPACE\legacy23.json"
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: Run the automatic bulk example with both bundles
+        shell: pwsh
+        run: |
+          foreach ($core in @('bulk22', 'bulk23')) {
+            python validation/bulk_auto_demo.py --bundle "$env:RUNNER_TEMP\$core" --inp examples/Net2.inp --node 2 --node 3 --pipe 1 --node-factor 1.01 --pipe-factor 1.01 --factors 0.9 1.0 0.9 --threads 1 --work-dir "$env:RUNNER_TEMP"
+            if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          }
       - name: Verify WNTR and friction output compatibility
         shell: pwsh
         run: |
