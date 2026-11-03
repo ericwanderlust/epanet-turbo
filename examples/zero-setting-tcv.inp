@@ -1,0 +1,35 @@
+[TITLE]
+Zero-setting TCV stress fixture
+
+[JUNCTIONS]
+A1	0	0
+B1	0	0.01
+
+[RESERVOIRS]
+R1	100
+
+[PIPES]
+P1	R1	A1	100	400	110	0	Open
+
+[VALVES]
+V1	A1	B1	400	TCV	0	0
+
+[TIMES]
+Duration 0:00
+Hydraulic Timestep 0:05
+
+[REPORT]
+Status Yes
+Summary No
+
+[OPTIONS]
+Units CMH
+Headloss H-W
+Trials 40
+Accuracy 0.001
+Unbalanced Continue 10
+Pattern 1
+Demand Multiplier 1
+Quality None
+
+[END]

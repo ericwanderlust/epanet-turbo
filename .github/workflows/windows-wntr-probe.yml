@@ -55,7 +55,7 @@ jobs:
           Copy-Item -Force validation/epanet23-windows-candidate.dll "$root23\native\windows_x86_64\epanet2.dll"
           python examples/verify_friction_precision.py --bundle $root23 --inp examples/Net2.inp --output friction23-contract.json --expected-version 20303
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-          python examples/verify_demand_multiplier.py "$root23\native\windows_x86_64\epanet2.dll" examples/Net2.inp multiplier23-contract.json
+          python examples/verify_demand_multiplier.py "$root23\native\windows_x86_64\epanet2.dll" examples/Net2.inp multiplier23-contract.json examples/zero-setting-tcv.inp
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
       - name: Run the encrypted benchmark
         shell: pwsh

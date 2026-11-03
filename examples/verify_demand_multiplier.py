@@ -8,6 +8,7 @@ lib.EN_gettimeparam.argtypes=[P,c.c_int,c.POINTER(c.c_long)];lib.EN_getnodevalue
 lib.EN_getlinkvalues.argtypes=[P,c.c_int,c.POINTER(c.c_double)];lib.EN_openH.argtypes=[P];lib.EN_initH.argtypes=[P,c.c_int]
 lib.EN_runH.argtypes=[P,c.POINTER(c.c_long)];lib.EN_nextH.argtypes=[P,c.POINTER(c.c_long)];lib.EN_closeH.argtypes=[P]
 lib.EN_close.argtypes=[P];lib.EN_deleteproject.argtypes=[P]
+lib.EN_solveH.argtypes=[P];lib.EN_solveQ.argtypes=[P]
 def getopt(h,k):
  v=c.c_double();assert lib.EN_getoption(h,k,c.byref(v))==0;return v.value
 def new(label):
@@ -49,5 +50,11 @@ try:
  repeat_equal=states[0]==states[-1]
 finally:lib.EN_close(warm);lib.EN_deleteproject(warm)
 result={'runs':summaries,'cold_equal':cold_equal,'repeat_equal':repeat_equal,'demand_changed':summaries[0]['first_positive_demand']!=summaries[2]['first_positive_demand'],'factors_correct':all(r['factor']==r['actual_factor'] for r in summaries),'viscosity_unchanged':all(r['viscosity_unchanged'] for r in summaries)}
+if len(sys.argv)>4:
+ model=sys.argv[4];tcv=new('tcv')
+ try:
+  result['zero_setting_tcv']=lib.EN_solveH(tcv)==0 and lib.EN_solveQ(tcv)==0
+ finally:lib.EN_close(tcv);lib.EN_deleteproject(tcv)
+ if not result['zero_setting_tcv']:sys.exit(1)
 out.write_text(json.dumps(result,indent=2));print(json.dumps(result))
 if not all(result[k] for k in ('cold_equal','repeat_equal','demand_changed','factors_correct','viscosity_unchanged')):sys.exit(1)
