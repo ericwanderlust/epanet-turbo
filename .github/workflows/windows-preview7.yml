@@ -1,0 +1,63 @@
+name: Windows encrypted preview candidate
+on:
+  push:
+    branches: [codex/preview7-windows-20261103]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: windows-2022
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ['3.11', '3.12']
+    env:
+      OMP_NUM_THREADS: '4'
+      OPENBLAS_NUM_THREADS: '1'
+      MPLBACKEND: Agg
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+          architecture: x64
+      - name: Extract candidate archives
+        shell: pwsh
+        run: |
+          Expand-Archive validation/epanet22-windows.zip "$env:RUNNER_TEMP\epanet22"
+          Expand-Archive validation/epanet23-windows.zip "$env:RUNNER_TEMP\epanet23"
+      - name: Install WNTR and runtime dependencies
+        shell: pwsh
+        run: |
+          python -m pip install -r "$env:RUNNER_TEMP\epanet22\requirements.txt"
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: Verify encrypted writer, reader and WNTR scenarios
+        shell: pwsh
+        run: |
+          python validation/verify_wntr_fast_io.py --bundle "$env:RUNNER_TEMP\epanet22" --inp examples/Net2.inp --work-dir "$env:RUNNER_TEMP"
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          python validation/verify_wntr_batch.py --bundle "$env:RUNNER_TEMP\epanet22" --inp examples/Net2.inp --work-dir "$env:RUNNER_TEMP"
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: Verify both version-aware encrypted bulk modules
+        shell: pwsh
+        run: |
+          $tag = 'cp' + ('${{ matrix.python-version }}' -replace '\.', '')
+          foreach ($core in @('epanet22', 'epanet23')) {
+            python examples/verify_bulk_auto.py --module-dir "$env:RUNNER_TEMP\$core\python\$tag" --lib22 "$env:RUNNER_TEMP\epanet22\native\windows_x86_64\epanet2.dll" --lib23 "$env:RUNNER_TEMP\epanet23\native\windows_x86_64\epanet2.dll" --inp examples/Net2.inp --output "$env:GITHUB_WORKSPACE\bulk-$core.json"
+            if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          }
+      - name: Verify low-flow friction precision
+        shell: pwsh
+        run: |
+          python examples/verify_friction_precision.py --bundle "$env:RUNNER_TEMP\epanet22" --inp examples/Net2.inp --output friction.json
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: preview7-windows-${{ matrix.python-version }}
+          path: |
+            bulk-epanet22.json
+            bulk-epanet23.json
+            friction.json
+          if-no-files-found: warn
