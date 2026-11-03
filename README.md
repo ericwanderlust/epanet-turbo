@@ -48,6 +48,30 @@
 
 主要收益来自**结果读取**，不能全部归因于原生求解器。本轮仅换读取器为 0.878 s、两项组合为 0.905 s，不能据此认定内核带来了额外端到端收益。以上数据只代表这台机器和这份模型，不代表 Windows、Linux 实机或其他网络的加速比。
 
+### 🧰 2.3 批量接口：一次处理整网
+
+需要反复校核、批量修改节点需水或管段粗糙系数？2.3.3 内核提供 `ENT_set_node_values` / `ENT_set_link_values` 批量设置，以及 `EN_get_all_pressures` / `EN_get_all_flows` 批量读取。它们把 Python 与原生库的逐项调用合并为数组调用；一个打开的模型也可以连续运行多个需水倍率工况。
+
+在同一济南子网、Apple M4 / macOS arm64 / WNTR 1.4.0 / Turbo 2.3.3 下，比较同一个 2.3 内核上的 WNTR Toolkit 式逐点调用与 Turbo 批量调用，读取先预热，各项交错测量 5 次，取单次接口阶段中位数：
+
+| 操作 | 逐点调用 | 批量调用 | 接口阶段倍数 |
+| --- | ---: | ---: | ---: |
+| 读取 46,834 个节点压力 | 12.34 ms | 0.110 ms | 约 112× |
+| 读取 48,245 个连接流量 | 12.86 ms | 0.095 ms | 约 136× |
+| 设置 46,828 个节点基本需水 | 14.43 ms | 1.33 ms | 约 10.8× |
+
+读取结果逐值一致；设置包含从 Python 列表转换成 NumPy 数组的时间，26,323 项实际发生变化，读回和还原通过。若索引与数值数组提前准备并复用，本次设置接口中位数为 0.109 ms。**以上不包含打开模型或水力求解，不能当作完整仿真的加速倍数**，也不意味着 WNTR 正式支持直接替换成 2.3 内核。[EPANET 2.3 本身也提供全网批量读取](https://github.com/OpenWaterAnalytics/EPANET/blob/v2.3.3/include/epanet2_2.h)；这里比较的是 WNTR 式逐点调用，不是与 2.3 原生批量读取比较。
+
+同一模型的 0.9 / 1.0 / 1.1 / 0.9 四次完整水力时序，复用 2.3 内核打开的模型为 1.487 s、每次重新打开为 1.682 s，约 1.13×；这是单轮结果，统计模型打开、求解与压力摘要，不包含其他业务 I/O，四组冷热压力摘要一致。
+
+[WNTR 调用示例](examples/wntr_turbo_demo.py) 使用 2.2 兼容包；[2.3 批量与多工况示例](examples/epanet23_bulk_demo.py) 直接调用 2.3 原生库，例如：
+
+```bash
+python examples/epanet23_bulk_demo.py --library /path/to/epanet23/libepanet2.so --inp examples/Net2.inp --node 2 --node 3 --pipe 1 --node-factor 1.01 --pipe-factor 1.01 --factors 0.9 1.0 1.1 0.9
+```
+
+示例仅修改内存中的项目，不写回原始 INP。Windows 使用 2.3 包内的 `epanet2.dll`，macOS 使用 `libepanet2.dylib`；原生 Toolkit 结果采用 INP 单位，WNTR 结果采用 SI 单位。2.2 兼容包不包含这些 Turbo 专有批量符号。
+
 <a id="builds"></a>
 
 ### 📦 选择你的版本 | Choose your build
@@ -164,6 +188,30 @@ Using the PyArmor-protected distribution scripts, each configuration was warmed 
 - 🧩 **2.2 compatibility:** the separate engine exposes the standard 2.2 Toolkit for existing EPANET 2.2 / WNTR projects; it does not include the Turbo-specific 2.3 bulk API.
 
 Most of this measured gain comes from **result reading**, not the native solver alone. The reader-only median was 0.878 s versus 0.905 s for the combination, so this sample does not establish an additional end-to-end gain from the native engine. These numbers describe one model on one machine, not a general Windows, Linux or cross-model speed claim.
+
+### 🧰 2.3 bulk APIs for network-wide operations
+
+The 2.3.3 engine exposes `ENT_set_node_values` / `ENT_set_link_values` for batch writes and `EN_get_all_pressures` / `EN_get_all_flows` for batch reads. These combine per-item Python/native calls into array calls. A single open project can also run several demand-multiplier scenarios.
+
+On the same Jinan subnetwork and Apple M4 / macOS arm64 / WNTR 1.4.0 / Turbo 2.3.3, compare WNTR Toolkit-style per-item calls and Turbo batch calls on the **same 2.3 engine**. Reads were warmed up; medians of five interleaved measurements:
+
+| Operation | Per-item | Bulk | API-stage speedup |
+| --- | ---: | ---: | ---: |
+| Read pressure for 46,834 nodes | 12.34 ms | 0.110 ms | about 112× |
+| Read flow for 48,245 links | 12.86 ms | 0.095 ms | about 136× |
+| Set base demand for 46,828 nodes | 14.43 ms | 1.33 ms | about 10.8× |
+
+Reads matched exactly; the setter timing includes conversion from Python lists to NumPy arrays, with 26,323 values actually changed and readback/restoration verified. With prepared, reusable arrays the setter median was 0.109 ms. **These timings exclude model loading and hydraulic solving and are not full-simulation speedups.** They do not claim that WNTR officially supports directly replacing its core with 2.3. [EPANET 2.3 itself also provides bulk read APIs](https://github.com/OpenWaterAnalytics/EPANET/blob/v2.3.3/include/epanet2_2.h); this comparison is against WNTR-style per-item calls, not against upstream 2.3 bulk reads.
+
+For the same model, four complete hydraulic scenarios at factors 0.9 / 1.0 / 1.1 / 0.9 took 1.487 s reusing an open 2.3 project versus 1.682 s reopening for each, about 1.13×. This is a single run measuring model open, solve and compact pressure summaries, excluding other application I/O; cold/warm pressure summaries matched.
+
+Use the [WNTR example](examples/wntr_turbo_demo.py) with the 2.2-compatible archive, or the [2.3 bulk and scenarios example](examples/epanet23_bulk_demo.py) with the native 2.3 library:
+
+```bash
+python examples/epanet23_bulk_demo.py --library /path/to/epanet23/libepanet2.so --inp examples/Net2.inp --node 2 --node 3 --pipe 1 --node-factor 1.01 --pipe-factor 1.01 --factors 0.9 1.0 1.1 0.9
+```
+
+The example modifies the in-memory project only. Use `epanet2.dll` on Windows or `libepanet2.dylib` on macOS. Native Toolkit outputs use INP units, while WNTR outputs use SI units. The 2.2-compatible archive does not contain these Turbo-specific bulk symbols.
 
 ### 📦 Downloads and architectures
 
