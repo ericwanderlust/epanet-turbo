@@ -47,6 +47,16 @@ jobs:
       - name: Verify low-flow friction and hydraulic-file compatibility
         shell: pwsh
         run: python examples/verify_friction_precision.py --bundle "$env:TURBO_ROOT" --inp examples/Net2.inp --output friction-contract.json
+      - name: Verify EPANET 2.3 candidate
+        shell: pwsh
+        run: |
+          $root23 = Join-Path $env:RUNNER_TEMP 'epanet23-test'
+          Copy-Item -Recurse $env:TURBO_ROOT $root23
+          Copy-Item -Force validation/epanet23-windows-candidate.dll "$root23\native\windows_x86_64\epanet2.dll"
+          python examples/verify_friction_precision.py --bundle $root23 --inp examples/Net2.inp --output friction23-contract.json --expected-version 20303
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          python examples/verify_demand_multiplier.py "$root23\native\windows_x86_64\epanet2.dll" examples/Net2.inp multiplier23-contract.json
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
       - name: Run the encrypted benchmark
         shell: pwsh
         run: |
@@ -60,5 +70,7 @@ jobs:
             reader-contract.json
             windows-wntr-probe.json
             friction-contract.json
+            friction23-contract.json
+            multiplier23-contract.json
             encrypted-benchmark.json
           if-no-files-found: warn

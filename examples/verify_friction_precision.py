@@ -11,6 +11,7 @@ parser = argparse.ArgumentParser()
 parser.add_argument('--bundle', type=Path, required=True)
 parser.add_argument('--inp', type=Path, required=True)
 parser.add_argument('--output', type=Path, required=True)
+parser.add_argument('--expected-version', type=int, default=20200)
 args = parser.parse_args()
 os.environ['OMP_NUM_THREADS'] = '1'
 os.environ['OPENBLAS_NUM_THREADS'] = '1'
@@ -67,6 +68,10 @@ def live_factor(inp, directory):
         if code:
             raise RuntimeError(f'{name}: {code}')
 
+    version = ctypes.c_int()
+    call('EN_getversion', ctypes.byref(version))
+    if version.value != args.expected_version:
+        raise RuntimeError(f'Expected EPANET {args.expected_version}, got {version.value}')
     call('EN_createproject', ctypes.byref(project))
     try:
         call('EN_open', project, os.fsencode(inp), os.fsencode(directory / 'direct.rpt'), b'')
@@ -91,7 +96,8 @@ def live_factor(inp, directory):
                 flow = ctypes.c_double()
                 call('EN_getlinkvalue', project, link, 8, ctypes.byref(flow))
                 q = flow.value / 448.831
-                return 39.725 * abs(heads[0] - heads[1]) / 350 / (q * q)
+                loss = abs(heads[0] - heads[1]) / 350
+                return 39.725 * loss / (q * q), loss
             call('EN_nextH', project, ctypes.byref(step))
             if not step.value:
                 raise RuntimeError('Net2 did not reach 25 hours')
@@ -106,21 +112,26 @@ with tempfile.TemporaryDirectory(prefix='epanet-friction-') as temp:
     fresh = run(directory, 'fresh')
     fast = run(directory, 'fast', fast=True)
     exact(fresh, fast)
-    expected = live_factor(directory / 'fresh.inp', directory)
+    expected, expected_headloss = live_factor(directory / 'fresh.inp', directory)
     observed = float(fresh.link['friction_factor'].loc[90000, '20'])
+    observed_headloss = float(fresh.link['headloss'].loc[90000, '20'])
     np.testing.assert_allclose(observed, expected, rtol=5e-6, atol=1e-7)
+    np.testing.assert_allclose(observed_headloss, expected_headloss, rtol=5e-6, atol=1e-11)
     hyd = directory / 'fresh.hyd'
     reused = run(directory, 'reused', hydro=hyd)
     stock_reused = run(directory, 'stock-reused', hydro=hyd, stock=True)
-    np.testing.assert_array_equal(reused.link['friction_factor'].to_numpy(),
-                                  stock_reused.link['friction_factor'].to_numpy())
+    for field in ('friction_factor', 'headloss'):
+        np.testing.assert_array_equal(reused.link[field].to_numpy(),
+                                      stock_reused.link[field].to_numpy())
     report = {
         'fresh_friction_factor': observed,
         'live_double_head_reference': expected,
+        'fresh_headloss': observed_headloss,
+        'live_double_headloss_reference': expected_headloss,
         'reused_standard_hyd_friction_factor': float(reused.link['friction_factor'].loc[90000, '20']),
         'fast_reader_exact': True,
         'standard_hyd_readable_by_stock_epanet': True,
-        'note': 'Existing standard .hyd files store rounded heads; their reused friction factors retain that precision limit.',
+        'note': 'Existing standard .hyd files store rounded heads; their reused headloss and friction factors retain that precision limit.',
     }
     args.output.write_text(json.dumps(report, indent=2), encoding='utf-8')
     print(json.dumps(report, indent=2))
