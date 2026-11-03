@@ -15,6 +15,7 @@ parser.add_argument('--pipe', action='append', default=[], help='pipe ID; repeat
 parser.add_argument('--node-factor', type=float, default=1.0, help='multiply selected base demands')
 parser.add_argument('--pipe-factor', type=float, default=1.0, help='multiply selected pipe roughness')
 parser.add_argument('--threads', type=int, default=4)
+parser.add_argument('--work-dir', help='existing directory for a temporary report')
 parser.add_argument('--factors', type=float, nargs='+', default=[1.0], help='demand multiplier for each full scenario')
 args = parser.parse_args()
 if args.threads < 1 or args.node_factor < 0 or args.pipe_factor <= 0 or any(f < 0 for f in args.factors):
@@ -32,6 +33,11 @@ def bind(name, types):
     fn = getattr(lib, name)
     fn.argtypes, fn.restype = types, c.c_int
     return fn
+
+version = c.c_int()
+version_fn = bind('EN_getversion', [int_p])
+if version_fn(c.byref(version)) != 0 or version.value != 20303:
+    raise SystemExit(f'Use the EPANET-Turbo 2.3.3 library (version 20303), found {version.value}')
 
 create = bind('EN_createproject', [c.POINTER(c.c_void_p)])
 open_model = bind('EN_open', [c.c_void_p, c.c_char_p, c.c_char_p, c.c_char_p])
@@ -89,7 +95,7 @@ def set_batch(names, lookup, get_type, getter, setter, prop, factor, allowed):
 
 
 opened = hydraulics_open = False
-directory = TemporaryDirectory(prefix='epanet-turbo-demo-')
+directory = TemporaryDirectory(prefix='epanet-turbo-demo-', dir=args.work_dir)
 check(create(c.byref(project)), 'create project')
 try:
     report = Path(directory.name) / 'report.rpt'

@@ -36,6 +36,10 @@ from fast_wntr_reader import FastBinFile
 
 output = Path(args.output_dir).expanduser().resolve()
 output.mkdir(parents=True, exist_ok=True)
+try:
+    str(output / 'run').encode('latin-1')
+except UnicodeEncodeError:
+    raise SystemExit('WNTR 1.4 requires a Latin-1 output path; use --output-dir with an ASCII path')
 network = wntr.network.WaterNetworkModel(args.inp)
 simulator = TurboSimulator(network, bundle / 'native' / subdir / library)
 simulator.reader = FastBinFile()
