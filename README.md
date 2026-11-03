@@ -46,6 +46,8 @@ python examples/demo_adapter.py --inp examples/Net1.inp \
 
 macOS 和 OrbStack Linux 的 Net1 对照均覆盖 24 小时、25 个报告时刻，压力、水头、需水量和流量均与 WNTR 自带 EPANET 2.2 的对应输出一致。它不代表所有模型、控制规则、水质功能或平台都已通过兼容性验收；请使用自己的模型开展对照。
 
+对于直接调用 EPANET Toolkit 的 2.2 程序，API 名称兼容不保证状态语义或数值完全一致。例如 `EN_getlinkvalue(..., EN_STATUS)`：2.2 将活动阀返回为打开状态 `1`，2.3 可以返回活动状态 `2`。现有 WNTR 适配器负责加载库与运行仿真，不为直接 Toolkit 调用转换这一状态值；需要旧语义的调用方应明确映射并对实际模型进行结果比较。
+
 ## 收敛问题的历史
 
 旧文档中的 **Turbo v2.3 / M7** 是产品版本号；它与底层 **EPANET 2.3** 是两个不同的版本概念。M7 引入了针对长尾迭代震荡的自适应松弛，当前引擎源码保留该逻辑，但这不等于所有模型的收敛问题都已解决。
@@ -66,7 +68,7 @@ The [v2.8.1-preview.1 release](https://github.com/ericwanderlust/epanet-turbo/re
 
 **Known issue:** the macOS arm64 and emulated Linux x64 previews fail with hydraulic error 110 on a three-node positive-pressure network containing a zero-setting TCV; official EPANET 2.3.3 and a local fix candidate complete the test. Windows shares the same source but has not been tested on this case. Do not use the preview for production or performance evaluation.
 
-For WNTR, copy [examples/turbo_adapter.py](examples/turbo_adapter.py) into your project and pass the downloaded library path to `TurboSimulator`. Run it in a process without concurrent WNTR simulations; the adapter temporarily selects a process-wide toolkit class. The underlying engine reports EPANET 2.3. The preview retains Turbo's adaptive relaxation and uses the built-in solver with OpenMP disabled and does not enable CHOLMOD takeover. The release contains native libraries, not a Python wheel. The matching C build source is not included in this public repository.
+For WNTR, copy [examples/turbo_adapter.py](examples/turbo_adapter.py) into your project and pass the downloaded library path to `TurboSimulator`. Run it in a process without concurrent WNTR simulations; the adapter temporarily selects a process-wide toolkit class. The underlying engine reports EPANET 2.3. Direct Toolkit consumers should account for 2.3 status semantics: an active valve may return `2` from `EN_STATUS`, whereas EPANET 2.2 returns `1`. The WNTR adapter loads the library but does not translate direct Toolkit results. The preview retains Turbo's adaptive relaxation and uses the built-in solver with OpenMP disabled and does not enable CHOLMOD takeover. The release contains native libraries, not a Python wheel. The matching C build source is not included in this public repository.
 
 ## License
 
