@@ -59,9 +59,10 @@ def timed_method(name, original):
     return run
 
 
-def compare(reference, candidate, label):
+def compare(reference, candidate, label, *, exact=False):
     if reference.error_code != candidate.error_code:
         raise ValueError(f'{label}: simulation error codes differ')
+    differences = {}
     for group in ('node', 'link'):
         expected = getattr(reference, group)
         actual = getattr(candidate, group)
@@ -76,8 +77,21 @@ def compare(reference, candidate, label):
             left, right = a.to_numpy(), b.to_numpy()
             if not np.isfinite(left).all() or not np.isfinite(right).all():
                 raise ValueError(f'{label}: {group}.{field} contains non-finite values')
-            if not np.array_equal(left, right):
+            equal = np.array_equal(left, right)
+            if not equal and (exact or (group == 'link' and field == 'status')):
                 raise ValueError(f'{label}: {group}.{field} values differ')
+            delta = np.abs(left.astype(np.float64) - right.astype(np.float64))
+            summary = {
+                'equal': bool(equal),
+                'different_values': int(np.count_nonzero(delta)),
+                'max_absolute_difference': float(delta.max(initial=0)),
+            }
+            if delta.size and not equal:
+                row, col = np.unravel_index(np.argmax(delta), delta.shape)
+                summary.update(time=int(a.index[row]), id=str(a.columns[col]),
+                               stock=float(left[row, col]), turbo=float(right[row, col]))
+            differences[f'{group}.{field}'] = summary
+    return differences
 
 
 def run(label, directory):
@@ -112,12 +126,17 @@ try:
     with tempfile.TemporaryDirectory(prefix='epanet-wntr-benchmark-', dir=args.work_dir) as tmp:
         directory = Path(tmp)
         reference, _ = run(labels[0], directory)
-        for label in labels[1:]:
-            result, _ = run(label, directory)
-            compare(reference, result, label)
-            del result
-            gc.collect()
+        result, _ = run(labels[1], directory)
+        compare(reference, result, labels[1], exact=True)
+        del result
+        gc.collect()
+        turbo_reference, _ = run(labels[2], directory)
+        engine_differences = compare(reference, turbo_reference, labels[2])
         del reference
+        gc.collect()
+        result, _ = run(labels[3], directory)
+        compare(turbo_reference, result, labels[3], exact=True)
+        del turbo_reference, result
         gc.collect()
         for i in range(args.runs):
             order = labels[i % 4:] + labels[:i % 4]
@@ -144,7 +163,9 @@ report = {
     'quality': network.options.quality.parameter,
     'model_load_seconds': model_load_seconds, 'threads': args.threads,
     'description': 'One model load; one warm-up and rotated full run_sim measurements per configuration. Model load is excluded from run_sim.',
-    'warmup_results': 'All node and link result values and indices are exactly equal.',
+    'warmup_results': 'Each engine produces exactly equal results with the default and fast readers; stock and Turbo differences are reported below.',
+    'engine_differences': engine_differences,
+    'comparison_note': 'Timings do not establish engineering equivalence; assess the reported engine differences for the model.',
     'median_seconds': summary, 'runs': records,
 }
 text = json.dumps(report, indent=2)

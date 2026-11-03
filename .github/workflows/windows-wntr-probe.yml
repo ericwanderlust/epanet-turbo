@@ -21,10 +21,13 @@ jobs:
           architecture: x64
       - name: Download encrypted release bundle
         shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
           $zip = Join-Path $env:RUNNER_TEMP 'epanet22.zip'
           $root = Join-Path $env:RUNNER_TEMP 'epanet22'
-          Invoke-WebRequest -Uri 'https://github.com/ericwanderlust/epanet-turbo/releases/download/v2.8.1-preview.4/epanet-turbo-v2.8.1-preview.4-epanet22-compat-encrypted-windows-x64.zip' -OutFile $zip
+          gh release download v2.8.1-preview.5 --repo ericwanderlust/epanet-turbo --pattern '*windows-x64-candidate.zip' --output $zip
+          if ($LASTEXITCODE -ne 0) { throw 'Candidate download failed' }
           Expand-Archive -Path $zip -DestinationPath $root
           $tag = 'cp' + ('${{ matrix.python-version }}' -replace '\.', '')
           "TURBO_ROOT=$root" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
@@ -45,6 +48,14 @@ jobs:
       - name: Run full WNTR comparisons
         shell: pwsh
         run: python examples/windows_wntr_probe.py --bundle "$env:TURBO_ROOT" --inp examples/Net2.inp --output windows-wntr-probe.json
+      - name: Verify low-flow friction and hydraulic-file compatibility
+        shell: pwsh
+        run: python examples/verify_friction_precision.py --bundle "$env:TURBO_ROOT" --inp examples/Net2.inp --output friction-contract.json
+      - name: Run the encrypted benchmark
+        shell: pwsh
+        run: |
+          $tag = 'cp' + ('${{ matrix.python-version }}' -replace '\.', '')
+          python "$env:TURBO_ROOT\python\$tag\benchmark_wntr.py" --inp examples/Net2.inp --library "$env:TURBO_ROOT\native\windows_x86_64\epanet2.dll" --runs 1 --output encrypted-benchmark.json
       - uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -52,4 +63,6 @@ jobs:
           path: |
             reader-contract.json
             windows-wntr-probe.json
+            friction-contract.json
+            encrypted-benchmark.json
           if-no-files-found: warn
