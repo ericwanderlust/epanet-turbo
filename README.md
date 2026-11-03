@@ -1,6 +1,6 @@
 # EPANET-Turbo
 
-> **预览版已知问题：** macOS arm64 库在一个含零设定 TCV 的三节点正压测试中返回水力求解错误 110；官方 EPANET 2.3.3 和本地修复候选均可完成。其他平台使用同一份源码，但尚未运行该测试。此预览不适合作为性能交付或生产版本。
+> **预览版已知问题：** macOS arm64 和 OrbStack 仿真 Linux x64 库在含零设定 TCV 的三节点正压测试中返回水力求解错误 110；官方 EPANET 2.3.3 和本地修复候选均可完成。Windows 使用同一份源码，但尚未运行该测试。此预览不适合作为性能交付或生产版本。
 
 EPANET-Turbo 是基于 OWA-EPANET 2.3 的水力计算引擎；本次构建的 `EN_getversion` 返回 `20300`。本仓库提供项目文档、示例以及与 WNTR 的接入示例。最新的原生库按操作系统和 CPU 架构分别发布。
 
@@ -64,7 +64,7 @@ macOS 和 OrbStack Linux 的 Net1 对照均覆盖 24 小时、25 个报告时刻
 
 The [v2.8.1-preview.1 release](https://github.com/ericwanderlust/epanet-turbo/releases/tag/v2.8.1-preview.1) distributes separate native libraries for **Windows x64**, **Linux x64**, and **macOS arm64**. Windows is cross-compiled and awaits a Windows runtime test. The Linux build uses Debian 12 / glibc 2.36. The macOS deployment target is 11.0; runtime testing was performed on macOS 27.0.1. The macOS and emulated Linux x64 builds have been compared with WNTR 1.4.0's EPANET 2.2 on Net1. Windows ARM64, Linux ARM64, and Intel macOS binaries are not included.
 
-**Known issue:** the macOS arm64 preview fails with hydraulic error 110 on a three-node positive-pressure network containing a zero-setting TCV; official EPANET 2.3.3 and a local fix candidate complete the test. The other builds share the same source but have not been tested on this case. Do not use the preview for production or performance evaluation.
+**Known issue:** the macOS arm64 and emulated Linux x64 previews fail with hydraulic error 110 on a three-node positive-pressure network containing a zero-setting TCV; official EPANET 2.3.3 and a local fix candidate complete the test. Windows shares the same source but has not been tested on this case. Do not use the preview for production or performance evaluation.
 
 For WNTR, copy [examples/turbo_adapter.py](examples/turbo_adapter.py) into your project and pass the downloaded library path to `TurboSimulator`. Run it in a process without concurrent WNTR simulations; the adapter temporarily selects a process-wide toolkit class. The underlying engine reports EPANET 2.3. The preview retains Turbo's adaptive relaxation and uses the built-in solver with OpenMP disabled and does not enable CHOLMOD takeover. The release contains native libraries, not a Python wheel. The matching C build source is not included in this public repository.
 
