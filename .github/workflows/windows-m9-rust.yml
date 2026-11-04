@@ -1,0 +1,86 @@
+name: Windows M9 and Rust candidate
+on:
+  push:
+    branches: [codex/windows-rust-m9-20261104]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: windows-2022
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ['3.11', '3.12']
+    env:
+      OMP_NUM_THREADS: '4'
+      OMP_DYNAMIC: 'FALSE'
+      OPENBLAS_NUM_THREADS: '1'
+      MPLBACKEND: Agg
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+          architecture: x64
+      - name: Prepare protected packages and candidate binaries
+        shell: pwsh
+        run: |
+          Expand-Archive validation/epanet22-windows.zip "$env:RUNNER_TEMP\epanet22"
+          Expand-Archive validation/epanet23-windows.zip "$env:RUNNER_TEMP\epanet23"
+          Copy-Item validation/epanet22-m9.dll "$env:RUNNER_TEMP\epanet22\native\windows_x86_64\epanet2.dll" -Force
+          New-Item -ItemType Directory "$env:RUNNER_TEMP\rust" | Out-Null
+          $tag = 'cp' + ('${{ matrix.python-version }}'.Replace('.', ''))
+          Copy-Item "validation/epanet_rs_$tag.pyd" "$env:RUNNER_TEMP\rust\epanet_rs.pyd"
+      - name: Install WNTR dependencies
+        shell: pwsh
+        run: |
+          python -m pip install -r "$env:RUNNER_TEMP\epanet22\requirements.txt"
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: Verify protected WNTR and bulk APIs
+        shell: pwsh
+        run: |
+          python validation/verify_wntr_fast_io.py --bundle "$env:RUNNER_TEMP\epanet22" --inp examples/Net2.inp --work-dir "$env:RUNNER_TEMP"
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          python validation/verify_wntr_batch.py --bundle "$env:RUNNER_TEMP\epanet22" --inp examples/Net2.inp --work-dir "$env:RUNNER_TEMP"
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          $tag = 'cp' + ('${{ matrix.python-version }}'.Replace('.', ''))
+          foreach ($core in @('epanet22', 'epanet23')) {
+            python examples/verify_bulk_auto.py --module-dir "$env:RUNNER_TEMP\$core\python\$tag" --lib22 "$env:RUNNER_TEMP\epanet22\native\windows_x86_64\epanet2.dll" --lib23 "$env:RUNNER_TEMP\epanet23\native\windows_x86_64\epanet2.dll" --inp examples/Net2.inp --output "$env:RUNNER_TEMP\bulk-$core.json"
+            if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          }
+          python examples/verify_friction_precision.py --bundle "$env:RUNNER_TEMP\epanet22" --inp examples/Net2.inp --output "$env:RUNNER_TEMP\friction.json"
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: Verify Rust against stock 2.2, Turbo 2.2 and 2.3
+        shell: pwsh
+        run: |
+          python validation/verify_rust_windows.py --extension-dir "$env:RUNNER_TEMP\rust" --bundle22 "$env:RUNNER_TEMP\epanet22" --bundle23 "$env:RUNNER_TEMP\epanet23" --inp examples/Net2.inp
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: Verify topology recovery and production M9 path
+        shell: pwsh
+        run: |
+          $native = "$env:RUNNER_TEMP\epanet22\native\windows_x86_64"
+          $dll = Join-Path $native 'epanet2.dll'
+          $env:PATH = "$native;$env:PATH"
+          python validation/probe_addnode_openH.py $dll examples/Net1.inp "$env:RUNNER_TEMP\node.rpt"
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          foreach ($threads in @(1, 4)) {
+            $result = & validation/probe-m9.exe $dll validation/parallel-10640.inp "$env:RUNNER_TEMP\m9-t$threads" $threads
+            if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+            $result | Set-Content "$env:RUNNER_TEMP\m9-t$threads.json"
+            $stats = $result | ConvertFrom-Json
+            if (-not $stats.complete -or $stats.hard_error -or $stats.nonfinite -or $stats.warnings) { throw 'M9 probe failed' }
+            if ($threads -eq 4 -and -not $stats.gather_index_used) { throw 'M9 branch was not entered' }
+          }
+          fc.exe /b "$env:RUNNER_TEMP\m9-t1.frames.bin" "$env:RUNNER_TEMP\m9-t4.frames.bin"
+          if ($LASTEXITCODE -ne 0) { throw 'M9 result frames differ' }
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: windows-m9-rust-${{ matrix.python-version }}
+          path: |
+            ${{ runner.temp }}/bulk-epanet22.json
+            ${{ runner.temp }}/bulk-epanet23.json
+            ${{ runner.temp }}/friction.json
+            ${{ runner.temp }}/m9-t*.json
+          if-no-files-found: warn
