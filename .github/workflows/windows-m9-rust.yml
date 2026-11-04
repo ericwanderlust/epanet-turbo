@@ -23,15 +23,14 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
           architecture: x64
-      - name: Prepare protected packages and candidate binaries
+      - name: Extract exact preview.8 release archives
         shell: pwsh
         run: |
-          Expand-Archive validation/epanet22-windows.zip "$env:RUNNER_TEMP\epanet22"
-          Expand-Archive validation/epanet23-windows.zip "$env:RUNNER_TEMP\epanet23"
-          Copy-Item validation/epanet22-m9.dll "$env:RUNNER_TEMP\epanet22\native\windows_x86_64\epanet2.dll" -Force
-          New-Item -ItemType Directory "$env:RUNNER_TEMP\rust" | Out-Null
+          Expand-Archive validation/epanet22-preview8-windows.zip "$env:RUNNER_TEMP\epanet22"
+          Expand-Archive validation/epanet23-preview8-windows.zip "$env:RUNNER_TEMP\epanet23"
           $tag = 'cp' + ('${{ matrix.python-version }}'.Replace('.', ''))
-          Copy-Item "validation/epanet_rs_$tag.pyd" "$env:RUNNER_TEMP\rust\epanet_rs.pyd"
+          fc.exe /b "$env:RUNNER_TEMP\epanet22\python\$tag\epanet_rs.pyd" "$env:RUNNER_TEMP\epanet23\python\$tag\epanet_rs.pyd"
+          if ($LASTEXITCODE -ne 0) { throw 'Rust extensions in the two packages differ' }
       - name: Install WNTR dependencies
         shell: pwsh
         run: |
@@ -54,7 +53,8 @@ jobs:
       - name: Verify Rust against stock 2.2, Turbo 2.2 and 2.3
         shell: pwsh
         run: |
-          python validation/verify_rust_windows.py --extension-dir "$env:RUNNER_TEMP\rust" --bundle22 "$env:RUNNER_TEMP\epanet22" --bundle23 "$env:RUNNER_TEMP\epanet23" --inp examples/Net2.inp
+          $tag = 'cp' + ('${{ matrix.python-version }}'.Replace('.', ''))
+          python validation/verify_rust_windows.py --extension-dir "$env:RUNNER_TEMP\epanet22\python\$tag" --bundle22 "$env:RUNNER_TEMP\epanet22" --bundle23 "$env:RUNNER_TEMP\epanet23" --inp examples/Net2.inp
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
       - name: Verify topology recovery and production M9 path
         shell: pwsh
