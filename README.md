@@ -1,15 +1,15 @@
 <div align="center">
 
-# 🏎️ EPANET-Turbo v2.8.1-preview.7
+# 🏎️ EPANET-Turbo v2.8.1-preview.8
 
 ### 让水力模拟跑得更快 | Faster hydraulic simulation
 
-[![Version](https://img.shields.io/badge/version-v2.8.1--preview.7-blue)](https://github.com/ericwanderlust/epanet-turbo/releases/tag/v2.8.1-preview.7)
+[![Version](https://img.shields.io/badge/version-v2.8.1--preview.8-blue)](https://github.com/ericwanderlust/epanet-turbo/releases/tag/v2.8.1-preview.8)
 [![Platform](https://img.shields.io/badge/platform-Windows%20x64%20%7C%20Linux%20x64%20%7C%20macOS%20arm64-blueviolet)](#builds)
 [![WNTR](https://img.shields.io/badge/WNTR-1.4.0-green)](https://github.com/USEPA/WNTR)
 [![License](https://img.shields.io/badge/license-MIT-yellow)](LICENSE)
 
-[🇨🇳 中文](#chinese) | [🇬🇧 English](#english) | [📦 Download](https://github.com/ericwanderlust/epanet-turbo/releases/tag/v2.8.1-preview.7)
+[🇨🇳 中文](#chinese) | [🇬🇧 English](#english) | [📦 Download](https://github.com/ericwanderlust/epanet-turbo/releases/tag/v2.8.1-preview.8)
 
 </div>
 
@@ -21,7 +21,7 @@
 
 **EPANET-Turbo** 面向供水管网水力模拟，提供 EPANET 原生内核优化和 WNTR 结果读取加速。拿你熟悉的 WNTR 工作流，看看同一份模型能跑多快。🚀
 
-**v2.8.1-preview.7** 是技术预览版：分平台提供 EPANET 2.2 兼容内核、2.3.3 内核，以及 PyArmor 保护的 WNTR 1.4.0 快速 I/O、多场景接口和 2.2 / 2.3 自动识别的批量接口。
+**v2.8.1-preview.8** 是技术预览版：分平台提供 EPANET 2.2 兼容内核、2.3.3 内核，以及 PyArmor 保护的 WNTR 1.4.0 快速 I/O、多场景接口和 2.2 / 2.3 自动识别的批量接口。2.2 内核加入 M9 索引组装，两个内核都附带可选的 Rust 水力接口。
 
 > ⚠️ **旧版 2.3 接口修复**：v2.8.0、v2.8.1-preview.1 和 preview.2 的 `ENT_set_demand_multiplier` 会错误修改相对黏度，而不是需水倍率，并可能返回成功。**preview.3 起已修正**。如果用旧接口计算过工况，请重新验证；旧版可调用标准接口 `EN_setoption(project, EN_DEMANDMULT, factor)`。新的 `BulkAPI` 对所有内核都使用标准接口，避开这个旧版问题。
 
@@ -48,6 +48,18 @@
 
 主要收益来自**结果读取**，不能全部归因于原生求解器。本轮仅换读取器为 1.199 s、两项组合为 1.230 s，不能据此认定内核带来了额外端到端收益。以上数据只代表这台机器和这份模型，不代表 Windows、Linux 实机或其他网络的加速比。
 
+🧪 **preview.8 M9 对照**：同一济南子网在原生 Linux x64（Intel i7-14700KF）、WNTR 1.4.0 和 4 个 OpenMP 线程下，依次运行 `0.9 / 1.0 / 1.1 / 0.9` 四个需水倍率，预热后轮换 5 次。四次完整 `run_sim` 的总耗时中位数如下：
+
+| 配置 | 四场景总时间 | 对照 |
+| --- | ---: | --- |
+| 原版 WNTR 2.2 | 9.596 s | 基线 |
+| 2.2 无 M9 基线（GCC 12） | 4.531 s | 同源码、同编译器的对照 |
+| preview.8 M9 索引组装（GCC 12） | 4.366 s | 相对无 M9 基线逐轮中位节省 3.65%，5 / 5 轮更快 |
+
+候选与无 M9 基线的 12 张结果表逐值一致，四个场景均无水力求解告警；与原版相比，水头损失和摩阻系数因输出精度修复而不同。计时包含写入、完整求解和读取结果，不含模型首次加载及导入。相对原版 WNTR，候选逐轮中位约快 2.19 倍。在 9,944–39,484 条连接的四个规则网格上，同编译器的逐轮中位变化为 -0.60% 至 +1.73%；10,000 条连接只是启用条件，不是通用性能拐点。**2.2 下载包已包含该 M9 组装**；这一结果仅适用于所测模型和机器。
+
+🦀 Rust 固定宽度 ID 解码已接入试验读取器：同一模型七轮中，结果读取逐轮中位节省 4.95%，完整仿真逐轮中位节省 0.37%，仅 4 / 7 轮更快。该试验路径尚未包含在当前下载包中。
+
 ### 🚀 WNTR 多场景：模型打开一次，完整结果逐次取
 
 同一个模型要跑多组需水倍率？`DemandScenarios` 在进入上下文时写入并打开一次模型，每个场景仍完成水力、水质和结果读取，返回标准 WNTR 结果表。它自动确认实际加载的是 **EPANET 2.2**；使用 WNTR 自带的 2.2 库也可以运行。⚡
@@ -61,6 +73,8 @@
 | 3 | 4.370 s | 3.229 s | 26.1% |
 
 三组的配对中位缩短约 **26.7%**。计时包括首次快照、打开项目、四次完整水力 / 水质 / 读取和关闭；WNTR 模型的首次加载、Python 导入及计时外逐字段核对不计入。24 次正式场景的 12 张结果表、时间轴和数据类型逐值一致，原生求解告警为空。该模型水质类型为 `NONE`，且有低于 15 m 的压力值；化学、水龄和溯源另用小网验证。结果只代表本机和这份模型，M9 与 CHOLMOD 均未启用。
+
+🧪 在 Linux x64 的同一济南子网，用 preview.8 的 GCC 12 M9 内核重复这个对照：四次独立调用中位数 **4.316 s**，项目复用中位数 **3.069 s**；五轮逐对中位节省 **29.05%**，全部结果表逐值一致。计时包含批量上下文的打开和关闭。
 
 先解压对应平台的 2.2 包，并安装包内 `requirements.txt`。下面的代码选择与当前 CPython 版本匹配的加密脚本目录：
 
@@ -143,15 +157,15 @@ python examples/bulk_auto_demo.py --bundle /path/to/unpacked --inp examples/Net2
 
 | 平台 / Platform | EPANET 2.2 兼容 / Compatible | EPANET 2.3.3 | 引擎 / Library |
 | --- | --- | --- | --- |
-| 🪟 **Windows x64** | [📥 Download](https://github.com/ericwanderlust/epanet-turbo/releases/download/v2.8.1-preview.7/epanet-turbo-v2.8.1-preview.7-epanet22-compat-encrypted-windows-x64.zip) | [📥 Download](https://github.com/ericwanderlust/epanet-turbo/releases/download/v2.8.1-preview.7/epanet-turbo-v2.8.1-preview.7-epanet23-windows-x64.zip) | `epanet2.dll` |
-| 🐧 **Linux x64** | [📥 Download](https://github.com/ericwanderlust/epanet-turbo/releases/download/v2.8.1-preview.7/epanet-turbo-v2.8.1-preview.7-epanet22-compat-encrypted-linux-x64.zip) | [📥 Download](https://github.com/ericwanderlust/epanet-turbo/releases/download/v2.8.1-preview.7/epanet-turbo-v2.8.1-preview.7-epanet23-linux-x64.zip) | `libepanet2.so` |
-| 🍎 **macOS arm64** | [📥 Download](https://github.com/ericwanderlust/epanet-turbo/releases/download/v2.8.1-preview.7/epanet-turbo-v2.8.1-preview.7-epanet22-compat-encrypted-macos-arm64.zip) | [📥 Download](https://github.com/ericwanderlust/epanet-turbo/releases/download/v2.8.1-preview.7/epanet-turbo-v2.8.1-preview.7-epanet23-macos-arm64.zip) | `libepanet2.dylib` |
+| 🪟 **Windows x64** | [📥 Download](https://github.com/ericwanderlust/epanet-turbo/releases/download/v2.8.1-preview.8/epanet-turbo-v2.8.1-preview.8-epanet22-compat-encrypted-windows-x64.zip) | [📥 Download](https://github.com/ericwanderlust/epanet-turbo/releases/download/v2.8.1-preview.8/epanet-turbo-v2.8.1-preview.8-epanet23-windows-x64.zip) | `epanet2.dll` |
+| 🐧 **Linux x64** | [📥 Download](https://github.com/ericwanderlust/epanet-turbo/releases/download/v2.8.1-preview.8/epanet-turbo-v2.8.1-preview.8-epanet22-compat-encrypted-linux-x64.zip) | [📥 Download](https://github.com/ericwanderlust/epanet-turbo/releases/download/v2.8.1-preview.8/epanet-turbo-v2.8.1-preview.8-epanet23-linux-x64.zip) | `libepanet2.so` |
+| 🍎 **macOS arm64** | [📥 Download](https://github.com/ericwanderlust/epanet-turbo/releases/download/v2.8.1-preview.8/epanet-turbo-v2.8.1-preview.8-epanet22-compat-encrypted-macos-arm64.zip) | [📥 Download](https://github.com/ericwanderlust/epanet-turbo/releases/download/v2.8.1-preview.8/epanet-turbo-v2.8.1-preview.8-epanet23-macos-arm64.zip) | `libepanet2.dylib` |
 
 2.2 兼容内核的 `EN_getversion` 返回 `20200`，2.3.3 内核返回 `20303`。`x64` 也叫 `x86_64`；`arm64` 对应 Apple Silicon。没有 Windows ARM64、Linux ARM64 或 Intel Mac 构建。解压后请把引擎与随包的 OpenMP 运行库放在同一目录；ZIP **不是 Python wheel**。两个 ZIP 的引擎都位于 `native/<platform>/`；2.3 包还保留根目录原生库以兼容旧调用。两种包都提供 PyArmor 保护的批量辅助接口；2.2 包还提供加密的 WNTR 适配器、快速读写器、多场景接口和基准脚本。Python 脚本提供 CPython 3.11 / 3.12 子目录和匹配运行时。
 
-Linux x64 随包的原生库 / OpenMP 运行库需要 **glibc 2.34 或更新版本**；该最低版本本身尚未实测。
+Linux x64 随包的原生库 / OpenMP 运行库需要 **glibc 2.34 或更新版本**；该最低版本本身尚未实测。启动 Python 前，将包内 `native/linux_x86_64` 加入 `LD_LIBRARY_PATH`。
 
-🧪 **验证环境**：macOS 27.0.1 原生运行；Linux x64 在 OrbStack 仿真 Debian 12 / 13 上测试；Windows x64 在 GitHub 托管的原生 Windows Server 2022 虚拟机上运行 WNTR 1.4.0 与 CPython 3.11 / 3.12。实体 Windows 电脑和原生 Linux x64 服务器尚未验证。macOS 运行库标注最低版本为 14.0，但尚未在 14.0 实机验证。
+🧪 **验证环境**：macOS 27.0.1 arm64 原生运行；Linux x64 在原生 Intel i7-14700KF / glibc 2.43 上运行；Windows x64 在 GitHub 托管的 Windows Server 2022 虚拟机上运行。三个平台均验证 CPython 3.11 / 3.12、WNTR 1.4.0 加密包与 Rust 接口；Windows 还验证了合成大网的 M9 单时刻。实体 Windows 电脑尚未验证。macOS 运行库标注最低版本为 14.0，但尚未在 14.0 实机验证。
 
 ### 🐍 和 WNTR 一起用
 
@@ -209,6 +223,30 @@ python /path/to/unpacked/python/cp312/benchmark_wntr.py --inp network.inp --libr
 
 脚本要求同一内核的默认和快速读取器结果逐值一致，并记录原版与 Turbo 各字段的差异、位置和最大绝对差；状态不一致、非有限结果或计算错误会停止。它不替代工程容差验收。随后记录完整 `run_sim` 和各阶段耗时。使用 `--work-dir` 可以指定临时 INP、报告和输出文件的位置。仓库中的 [verify_fast_reader.py](examples/verify_fast_reader.py) 使用 Net1/2/3；运行时将对应的加密脚本目录加入 `PYTHONPATH`。[verify_bulk_auto.py](examples/verify_bulk_auto.py) 可对两个内核和 WNTR 自带 2.2 跑自动识别、读写与回退检查。请用自己的模型、机器和实际线程数验收。
 
+### 🦀 Rust 水力接口
+
+两个内核包均包含可选的 `epanet_rs` 扩展。它返回水力时间和扁平的压力、流量数组，采用模型的原生 Toolkit 单位；不生成 WNTR 的完整结果表或水质结果。普通 WNTR 工作流不会自动使用这个接口。
+
+```python
+from pathlib import Path
+import sys
+
+bundle = Path("/path/to/unpacked")
+sys.path.insert(0, str(bundle / "python" / f"cp{sys.version_info.major}{sys.version_info.minor}"))
+from epanet_rs import EpanetContext
+
+context = EpanetContext(str(bundle / "native/macos_arm64/libepanet2.dylib"))  # 按平台替换
+try:
+    context.open("network.inp")
+    times, pressures, flows, stats = context.run_hydraulics(threads=4)
+    pressure_by_time = pressures.reshape(len(times), context.n_nodes)
+    print(pressure_by_time.shape, stats["hydraulic_warnings"])
+finally:
+    context.close()
+```
+
+`stats["hydraulic_warnings"]` 保留求解告警，原生硬错误抛出异常；同一上下文不可并发使用。Windows 的 Rust 接口请使用 ASCII 模型与临时路径，必要时在启动 Python 前设置 `TMP` / `TEMP`。
+
 ### 🛠️ 兼容性与已知边界
 
 - ✅ **2.2 兼容内核**：macOS 和仿真 Linux 的 WNTR 1.4.0 对照中，济南子网 49 个时刻的压力、水头、需水、流量和状态一致；Net2 也核对了节点与管段水质。快速读取器的 Net1/2/3 用例覆盖水龄、化学、溯源、统计和单位转换。
@@ -216,9 +254,9 @@ python /path/to/unpacked/python/cp312/benchmark_wntr.py --inp network.inp --libr
 - 🐧 **Linux 原生加载**：2.2 库已显式链接 `libm`，在 OrbStack Linux x64 的独立 `dlopen` 和 WNTR 调用中通过验证。
 - 📄 **不完整结果**：快速读取器在非严格模式下保留可读的部分结果并标记错误；`convergence_error=True` 时抛出明确异常。
 - 💾 **复用 `.hyd` 的精度边界**：为保持标准文件兼容，复用任何标准 `.hyd` 时仍使用其中保存的单精度水头，包括刚生成后再次读取的文件，水头损失和摩阻系数仍可能受旧精度限制。正常完整仿真会使用临时水头差文件，空间约为 `4 字节 × 连接数 × 水力时刻数`。
-- ⚠️ **统计输出**：本机所测 NumPy 2.4.6 环境中，WNTR 1.4.0 的 `AVERAGED` 统计用例在默认读取器和快速读取器均抛出相同异常。
+- ⚠️ **统计输出**：所测 WNTR 1.4.0 的 `AVERAGED` 用例中，默认读取器抛出异常，preview.7 快速读取器返回带错误标记的部分结果；两者不能当作等价的完整结果。请检查 `results.error_code`。
 - 🔧 **2.3 收敛修复**：已修正零设定 TCV 的系数遗漏；三节点回归用例在 macOS、仿真 Linux 和原生 Windows Server 2022 x64 完成。**这不表示所有 2.3 收敛问题都已解决。**2.3 与 2.2 的直接 Toolkit 阀门状态编码和数值也可能不同。
-- 🧮 **CHOLMOD / M9**：当前发行包使用内置线性求解器，关闭 CHOLMOD、外部求解器接管和 M9 融合组装。健康合成网格测试中，CHOLMOD 在约 2 万到 5 万节点间出现候选性能交叉，但结构和初始化耗时影响很大，**不是生产启用阈值**。负压、低于 15 m、警告、非有限值或短 EPS 的模型不能让 CHOLMOD 接管。
+- 🧮 **CHOLMOD / M9**：发行包使用内置线性求解器，不启用 CHOLMOD 或外部求解器接管。2.2 在连接数不少于 10,000 且 OpenMP 线程数大于 1 时启用 M9 索引组装；2.3 未启用 M9。健康合成网格测试中，CHOLMOD 在约 2 万到 5 万节点间出现候选性能交叉，但结构和初始化耗时影响很大，**不是生产启用阈值**。负压、低于 15 m、警告、非有限值或短 EPS 的模型不能让 CHOLMOD 接管。
 - 📂 **源码状态**：公开仓库目前不含与这些原生二进制完全对应的 C 构建源码或受保护实现的完整源码；Release 标签提供文档和调用示例。各 ZIP 包含运行库许可证及第三方源码来源。
 
 ---
@@ -229,7 +267,7 @@ python /path/to/unpacked/python/cp312/benchmark_wntr.py --inp network.inp --libr
 
 **EPANET-Turbo** explores native EPANET optimizations and faster WNTR result loading for water-network simulation. Keep your familiar WNTR workflow and measure the difference on your own models. 🚀
 
-**v2.8.1-preview.7** is a technical preview with separate EPANET 2.2-compatible and 2.3.3-based native engines, plus PyArmor-protected fast WNTR 1.4.0 I/O, demand scenarios and version-aware bulk access for 2.2 / 2.3.
+**v2.8.1-preview.8** is a technical preview with separate EPANET 2.2-compatible and 2.3.3-based native engines, PyArmor-protected fast WNTR 1.4.0 I/O, demand scenarios and version-aware bulk access. The 2.2 engine adds indexed M9 assembly, and both packages include an optional Rust hydraulic API.
 
 > ⚠️ **Fix for earlier 2.3 releases:** in v2.8.0, v2.8.1-preview.1 and preview.2, `ENT_set_demand_multiplier` changes relative viscosity instead of the demand multiplier and can return success. **This was fixed in preview.3.** Revalidate scenarios that used the affected function; on an earlier build, use the standard `EN_setoption(project, EN_DEMANDMULT, factor)`. The new `BulkAPI` uses the standard option on every engine, avoiding this issue with older builds.
 
@@ -256,6 +294,18 @@ Using the PyArmor-protected preview.6 distribution scripts, each configuration w
 
 Most of this measured gain comes from **result reading**, not the native solver alone. The reader-only median was 1.199 s versus 1.230 s for the combination, so this sample does not establish an additional end-to-end gain from the native engine. These numbers describe one model on one machine, not a general Windows, Linux or cross-model speed claim.
 
+🧪 **preview.8 M9 comparison:** on the same Jinan subnetwork with native Linux x64 (Intel i7-14700KF), WNTR 1.4.0 and four OpenMP threads, four demand multipliers (`0.9 / 1.0 / 1.1 / 0.9`) were run after warm-up in five rotated rounds:
+
+| Configuration | Median total for four full runs | Comparison |
+| --- | ---: | --- |
+| Original WNTR 2.2 | 9.596 s | Baseline |
+| 2.2 without M9 (GCC 12) | 4.531 s | Rebuilt control using the same compiler |
+| preview.8 indexed M9 (GCC 12) | 4.366 s | 3.65% median paired reduction vs. the control; faster in 5 / 5 rounds |
+
+All 12 result tables matched the no-M9 control exactly for every candidate scenario, with no hydraulic solver warnings. Headloss and friction-factor values differ from stock due to the output-precision fix. Timing includes writing, complete solves and result reading, and excludes initial model loading and imports. The candidate was 2.19 times faster than original WNTR in the median paired comparison. On four regular grids with 9,944–39,484 links and a consistent compiler, median paired changes ranged from -0.60% to +1.73%; the 10,000-link activation condition is not a universal performance crossover. **The 2.2 download includes this M9 assembly**; results apply to the tested models and machine.
+
+🦀 A Rust fixed-width ID decoder was also tested in the reader. Over seven rounds on the same model, median paired result-reading time fell 4.95%; full simulation time fell 0.37%, with 4 / 7 rounds faster. This experimental path is not in the current downloads.
+
 ### 🚀 Full WNTR demand scenarios on one open project
 
 `DemandScenarios` snapshots and opens a model once, then returns full WNTR hydraulic and water-quality results for each demand multiplier. It checks that the loaded engine is **EPANET 2.2**, including WNTR's own 2.2 library. ⚡
@@ -269,6 +319,8 @@ Using the **PyArmor-protected candidate**, the same Jinan network, Turbo 2.2's b
 | 3 | 4.370 s | 3.229 s | 26.1% |
 
 The median paired reduction was **26.7%**. Timing includes the first snapshot, project open, all four hydraulic / quality / result-reading calls, and close; initial WNTR model loading, Python imports and the separate field-by-field checks are excluded. All 24 measured scenarios matched in all 12 result tables, axes and dtypes; no native solver warnings occurred. This model uses quality type `NONE` and includes pressures below 15 m; chemical quality, age and trace were checked on smaller networks. Results are specific to this machine and model; M9 and CHOLMOD were disabled.
+
+🧪 Repeating the comparison on Linux x64 with the preview.8 GCC 12 M9 engine gave **4.316 s** for four independent runs and **3.069 s** with project reuse. The median paired reduction was **29.05%** over five rounds, with all result tables exactly equal. Batch setup and close are included.
 
 Extract the 2.2 package for your platform and install its `requirements.txt`. This example selects the encrypted script directory for your CPython version:
 
@@ -347,9 +399,9 @@ The example modifies only the in-memory project. Toolkit values use model-native
 
 Choose one OS, CPU architecture and engine from the [download table above](#builds): **Windows x64**, **Linux x64**, or **macOS arm64**. The 2.2-compatible core reports `20200` from `EN_getversion`; the 2.3.3 core reports `20303`. `x64` means `x86_64`; macOS arm64 is Apple Silicon. No Windows ARM64, Linux ARM64 or Intel Mac build is provided. Keep each engine beside the bundled OpenMP runtime. These archives are **not Python wheels**. Both ZIPs place the engine under `native/<platform>/`; the 2.3 archive also retains the root native libraries for existing callers. Both archives contain the PyArmor-protected batch helper; the 2.2 archive also includes the encrypted WNTR adapter, fast writer and reader, demand scenarios and benchmark script. Python components include matching CPython 3.11 / 3.12 runtimes.
 
-The bundled Linux x64 native libraries / OpenMP runtime require **glibc 2.34 or newer**; that minimum version itself has not been tested.
+The bundled Linux x64 native libraries / OpenMP runtime require **glibc 2.34 or newer**; that minimum version itself has not been tested. Add `native/linux_x86_64` to `LD_LIBRARY_PATH` before starting Python.
 
-🧪 **Tested environments:** native macOS 27.0.1; Linux x64 on emulated Debian 12 / 13 in OrbStack; Windows x64 on a GitHub-hosted native Windows Server 2022 VM with WNTR 1.4.0 and CPython 3.11 / 3.12. Physical Windows computers and native Linux x64 servers have not yet been tested. The bundled macOS runtime declares a minimum of macOS 14.0; that OS version has not been tested on a real machine.
+🧪 **Tested environments:** native macOS 27.0.1 arm64; native Linux x64 on Intel i7-14700KF / glibc 2.43; and a GitHub-hosted Windows Server 2022 x64 VM. Encrypted WNTR 1.4.0 and the Rust API were checked with CPython 3.11 / 3.12 on each platform. Windows also ran a single-step M9 check on a large synthetic network; physical Windows hardware has not been tested. The macOS runtime declares a minimum of macOS 14.0, which has not been tested on a real machine.
 
 ### 🐍 Use with WNTR
 
@@ -407,6 +459,30 @@ python /path/to/unpacked/python/cp312/benchmark_wntr.py --inp network.inp --libr
 
 The script requires exact equality between the default and fast readers for each engine, and records per-field differences, their locations and maximum absolute differences between stock and Turbo. It stops on different statuses, non-finite results or calculation errors; it does not establish engineering equivalence. It then times full `run_sim` and its stages. Set `--work-dir` to choose where temporary INP, report and output files are written. The repository's [verify_fast_reader.py](examples/verify_fast_reader.py) checks Net1/2/3; add the appropriate encrypted-script folder to `PYTHONPATH` when running it. [verify_bulk_auto.py](examples/verify_bulk_auto.py) checks detection, reads, writes and fallback with both engines and WNTR stock 2.2. Validate using your own models, hardware and thread count.
 
+### 🦀 Rust hydraulic API
+
+Both engine packages include the optional `epanet_rs` extension. It returns hydraulic times and flat pressure and flow arrays in native Toolkit units; it does not produce full WNTR result tables or water-quality results. Ordinary WNTR runs do not use it automatically.
+
+```python
+from pathlib import Path
+import sys
+
+bundle = Path("/path/to/unpacked")
+sys.path.insert(0, str(bundle / "python" / f"cp{sys.version_info.major}{sys.version_info.minor}"))
+from epanet_rs import EpanetContext
+
+context = EpanetContext(str(bundle / "native/macos_arm64/libepanet2.dylib"))  # select your platform
+try:
+    context.open("network.inp")
+    times, pressures, flows, stats = context.run_hydraulics(threads=4)
+    pressure_by_time = pressures.reshape(len(times), context.n_nodes)
+    print(pressure_by_time.shape, stats["hydraulic_warnings"])
+finally:
+    context.close()
+```
+
+`stats["hydraulic_warnings"]` retains solver warnings; native hard errors raise an exception. Do not use one context concurrently. For the Rust API on Windows, use ASCII model and temporary paths; set `TMP` / `TEMP` before starting Python if needed.
+
 ### 🛠️ Compatibility and known boundaries
 
 - ✅ **2.2-compatible engine:** WNTR 1.4.0 comparisons on macOS and emulated Linux matched pressure, head, demand, flow and status for all 49 reporting times of the Jinan diagnostic subnetwork; Net2 node and link quality were also checked. Fast-reader cases on Net1/2/3 cover water age, chemical quality, tracing, statistics and unit conversion.
@@ -414,9 +490,9 @@ The script requires exact equality between the default and fast readers for each
 - 🐧 **Linux native loading:** the 2.2 library now explicitly links `libm`; standalone `dlopen` and WNTR calls passed on Linux x64 in OrbStack.
 - 📄 **Incomplete results:** in non-strict mode, the fast reader retains readable partial results and marks them as an error; `convergence_error=True` raises a clear exception.
 - 💾 **Reused `.hyd` precision:** standard `.hyd` compatibility is retained. Reusing any standard `.hyd`, including one just saved, still uses its single-precision heads, so headloss and friction can retain the old precision limit. A normal full simulation uses a temporary head-difference file of approximately `4 bytes × links × hydraulic steps`.
-- ⚠️ **Statistics:** in the tested NumPy 2.4.6 environment, the WNTR 1.4.0 `AVERAGED` statistics case raises the same exception with both the default and fast readers.
+- ⚠️ **Statistics:** in the tested WNTR 1.4.0 `AVERAGED` case, the default reader raises an exception while the preview.7 fast reader returns partial results marked as an error. They are not equivalent complete results; check `results.error_code`.
 - 🔧 **2.3 convergence fix:** the missing coefficient for a zero-setting TCV is fixed; the three-node regression ran on macOS, emulated Linux and native Windows Server 2022 x64. **This does not mean that every 2.3 convergence problem is solved.** Direct Toolkit valve status codes and results can also differ between 2.2 and 2.3.
-- 🧮 **CHOLMOD / M9:** the current packages use the built-in linear solver; CHOLMOD, external solver takeover and M9 fused assembly are disabled. Healthy synthetic grids showed a candidate performance crossover between about 20,000 and 50,000 nodes, but topology and initialization matter; **this is not a production threshold**. Models with negative pressure, pressure below 15 m, warnings, non-finite values or short EPS must not use CHOLMOD takeover.
+- 🧮 **CHOLMOD / M9:** the packages use the built-in linear solver, with CHOLMOD and external solver takeover disabled. The 2.2 engine enables indexed M9 assembly for at least 10,000 links and more than one OpenMP thread; M9 is disabled in 2.3. Healthy synthetic grids showed a candidate performance crossover between about 20,000 and 50,000 nodes, but topology and initialization matter; **this is not a production threshold**. Models with negative pressure, pressure below 15 m, warnings, non-finite values or short EPS must not use CHOLMOD takeover.
 - 📂 **Source availability:** the public repository does not yet contain the exact C source used for these native binaries or the complete protected implementation source. The Release tag provides documentation and usage examples. Each ZIP includes runtime licenses and third-party source references.
 
 ---
