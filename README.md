@@ -58,6 +58,17 @@
 
 候选与无 M9 基线的 12 张结果表逐值一致，四个场景均无水力求解告警；与原版相比，水头损失和摩阻系数因输出精度修复而不同。计时包含写入、完整求解和读取结果，不含模型首次加载及导入。相对原版 WNTR，候选逐轮中位约快 2.19 倍。在 9,944–39,484 条连接的四个规则网格上，同编译器的逐轮中位变化为 -0.60% 至 +1.73%；10,000 条连接只是启用条件，不是通用性能拐点。**2.2 下载包已包含该 M9 组装**；这一结果仅适用于所测模型和机器。
 
+🪟 **济南完整模型：实体 Windows 测试反馈**。协作方报告在 Windows 11 x64 实体机（Intel i7-1260P、32 GB）、CPython 3.12、WNTR 1.4.0 和 4 线程下，使用 preview.8 2.2 加密包测试 **137,298 节点 / 139,888 条管段**，24 小时 / 49 个报告时刻。预热一次，交错运行三轮，取中位数：
+
+| 配置 | 完整 `run_sim` 中位数 | 相对原版默认 |
+| --- | ---: | ---: |
+| 原版 WNTR 2.2 + 默认读取 | 21.45 s | 基线 |
+| 原版 WNTR 2.2 + 快速读取 | 14.39 s | ⬇️ 32.9% |
+| Turbo 2.2 + 默认读取 | 19.14 s | ⬇️ 10.8% |
+| **Turbo 2.2 + 快速读取** | **13.89 s** | **⬇️ 35.2%** |
+
+计时包含写入、求解和读取，不含首次模型加载与 Python 导入。按反馈，两种 DLL 的直接 `ENsolveH` 对照约缩短 19.5%；这不是单独测量 M9 的收益。比较排除了 706 个报告为无源、零需水的孤立节点；其余 136,592 个节点的最大压力差为 9.35×10⁻⁵ m，报告的最大流量差为 2.50×10⁻⁶ m³/s，状态和设定值逐值一致。49 个时刻均有 code 6 负压告警，报告最低压力约 −50.08 m，未出现 code 110。该段是协作方邮件反馈，原始脚本和数据尚未由本仓库独立复核；不代表所有节点等同，也不改变 CHOLMOD 的安全边界。
+
 🦀 Rust 固定宽度 ID 解码已接入试验读取器：同一模型七轮中，结果读取逐轮中位节省 4.95%，完整仿真逐轮中位节省 0.37%，仅 4 / 7 轮更快。该试验路径尚未包含在当前下载包中。
 
 ### 🚀 WNTR 多场景：模型打开一次，完整结果逐次取
@@ -76,6 +87,8 @@
 
 🧪 在 Linux x64 的同一济南子网，用 preview.8 的 GCC 12 M9 内核重复这个对照：四次独立调用中位数 **4.316 s**，项目复用中位数 **3.069 s**；五轮逐对中位节省 **29.05%**，全部结果表逐值一致。计时包含批量上下文的打开和关闭。
 
+🪟 上述实体 Windows 完整模型反馈中，四个倍率的独立调用为 **53.36 s**，复用项目为 **37.17 s**，约缩短 **30%**；协作方报告结果表与独立调用逐值一致，原始记录尚未独立复核。
+
 先解压对应平台的 2.2 包，并安装包内 `requirements.txt`。下面的代码选择与当前 CPython 版本匹配的加密脚本目录：
 
 ```python
@@ -89,8 +102,8 @@ from turbo_wntr_batch import DemandScenarios
 
 network = wntr.network.WaterNetworkModel("your-model.inp")
 library = bundle / "native/macos_arm64/libepanet2.dylib"  # 按下方平台表替换
-work = Path("output")
-work.mkdir(exist_ok=True)
+work = Path(r"C:\epanet_turbo_work") if sys.platform == "win32" else Path("output")
+work.mkdir(parents=True, exist_ok=True)
 
 with DemandScenarios(network, library, work_dir=work) as batch:
     for factor in (0.9, 1.0, 1.1, 0.9):
@@ -98,7 +111,9 @@ with DemandScenarios(network, library, work_dir=work) as batch:
         print(factor, results.node["pressure"].iloc[0, :5], batch.last_warnings)
 ```
 
-`batch.last_warnings` 是当前场景的原生告警。倍率必须为有限正数；模型在进入上下文时快照，修改模型后请新建上下文。此接口使用 EPANET 2.2 的水质模拟，不支持 EPANET-MSX；工作目录需使用 WNTR 1.4 可处理的 Latin-1 路径。普通单次仿真也可用 `TurboSimulator(network, library, fast_io=True)` 同时启用快速写入和读取。
+`batch.last_warnings` 是当前场景的原生告警。倍率必须为有限正数；模型在进入上下文时快照，修改模型后请新建上下文。此接口使用 EPANET 2.2 的水质模拟，不支持 EPANET-MSX。普通单次仿真也可用 `TurboSimulator(network, library, fast_io=True)` 同时启用快速写入和读取。
+
+> 🪟 **Windows 工作路径**：WNTR 1.4 使用 Latin-1 编码原生文件路径。请为 `work_dir` 和普通仿真的 `file_prefix` 选择有写入权限、实际路径为 ASCII 的目录，例如 `C:\epanet_turbo_work`。`DemandScenarios` 会解析 `work_dir` 的真实路径；如果 `subst` 盘符指向中文目录，解析后仍可能报 `UnicodeEncodeError`。Linux / macOS 的工作路径也需能被 WNTR 的 Latin-1 编码处理。
 
 ### 🧰 2.2 / 2.3 批量接口：一次处理整网
 
@@ -141,6 +156,8 @@ bulk.set_demand_multiplier(0.9)    # 标准 EN_DEMANDMULT
 
 `BulkAPI(library, project)` 也可附着到已打开的原生项目。它读取实际库版本并逐项探测能力：Turbo 2.2 / 2.3 优先调用原生批量；没有 Turbo 符号时使用 EPANET 2.3 原生批量读取或逐项回退。检查 `capabilities` 即可确认路径；逐项回退保证兼容，但没有原生批量加速。识别对象是**实际载入的库，不是 INP 文件**；请仍按已有项目选择 2.2 或 2.3。普通 WNTR `run_sim` 不会自动变成批量工作流。
 
+💡 如果调度内循环只需要单个水力时刻和部分数组，可保持 Toolkit 项目打开，先调用 `ENopenH` / `ENinitH`，再按时刻调用 `ENrunH` / `ENnextH` 并用 `BulkAPI` 读取；不必每次都调用会写入 INP 并读取完整结果的 `TurboSimulator.run_sim`。请按模型要求管理步进和关闭。
+
 [完整批量与多工况示例](examples/bulk_auto_demo.py) 自动选择当前平台库，适用于两个包：
 
 ```bash
@@ -165,7 +182,7 @@ python examples/bulk_auto_demo.py --bundle /path/to/unpacked --inp examples/Net2
 
 Linux x64 随包的原生库 / OpenMP 运行库需要 **glibc 2.34 或更新版本**；该最低版本本身尚未实测。启动 Python 前，将包内 `native/linux_x86_64` 加入 `LD_LIBRARY_PATH`。
 
-🧪 **验证环境**：macOS 27.0.1 arm64 原生运行；Linux x64 在原生 Intel i7-14700KF / glibc 2.43 上运行；Windows x64 在 GitHub 托管的 Windows Server 2022 虚拟机上运行。三个平台均验证 CPython 3.11 / 3.12、WNTR 1.4.0 加密包与 Rust 接口；Windows 还验证了合成大网的 M9 单时刻。实体 Windows 电脑尚未验证。macOS 运行库标注最低版本为 14.0，但尚未在 14.0 实机验证。
+🧪 **验证环境**：macOS 27.0.1 arm64 原生运行；Linux x64 在原生 Intel i7-14700KF / glibc 2.43 上运行；Windows x64 在 GitHub 托管的 Windows Server 2022 虚拟机上运行。三个平台均验证 CPython 3.11 / 3.12、WNTR 1.4.0 加密包与 Rust 接口；Windows 虚拟机还验证了合成大网的 M9 单时刻。另有协作方报告在 Windows 11 x64 实体机以 CPython 3.12 测试 preview.8 **2.2 包和济南完整模型**，原始记录尚未由本仓库独立复核。macOS 运行库标注最低版本为 14.0，但尚未在 14.0 实机验证。
 
 ### 🐍 和 WNTR 一起用
 
@@ -174,6 +191,8 @@ Linux x64 随包的原生库 / OpenMP 运行库需要 **glibc 2.34 或更新版�
 ```bash
 python -m pip install -r /path/to/unpacked/requirements.txt
 ```
+
+> 🐍 加密包支持 **CPython 3.11 / 3.12**，目前不支持 Python 3.13。Windows 请使用上文所述的真实 ASCII 工作目录。
 
 将示例中的路径换成实际解压目录：
 
@@ -194,20 +213,21 @@ sys.path.insert(0, str(bundle / "python" / python_tag))
 
 import wntr
 from turbo_adapter import TurboSimulator
-from fast_wntr_reader import FastBinFile
 
 network = wntr.network.WaterNetworkModel("network.inp")
-simulator = TurboSimulator(network, bundle / "native" / "linux_x86_64" / "libepanet2.so")
-simulator.reader = FastBinFile()  # 可选：加速结果读取
-results = simulator.run_sim(file_prefix="output/run", version=2.2)
+simulator = TurboSimulator(network, bundle / "native" / "linux_x86_64" / "libepanet2.so", fast_io=True)
+work = Path(r"C:\epanet_turbo_work") if sys.platform == "win32" else Path("output")
+work.mkdir(parents=True, exist_ok=True)
+results = simulator.run_sim(file_prefix=str(work / "run"), version=2.2)
 
 pressure = results.node["pressure"]
 flow = results.link["flowrate"]
 ```
 
-先创建 `output/`；Windows 使用 `native/windows_x86_64/epanet2.dll`，macOS 使用 `native/macos_arm64/libepanet2.dylib`。不设置 `simulator.reader` 就使用 WNTR 默认读取器。`FastBinFile` 也可单独用于 WNTR 自带内核：
+Windows 使用 `native/windows_x86_64/epanet2.dll`，macOS 使用 `native/macos_arm64/libepanet2.dylib`。`fast_io=True` 同时启用快速写入和读取；省略它时使用默认读写。`FastBinFile` 也可单独用于 WNTR 自带内核：
 
 ```python
+from fast_wntr_reader import FastBinFile
 simulator = wntr.sim.EpanetSimulator(network, reader=FastBinFile())
 ```
 
@@ -304,6 +324,17 @@ Most of this measured gain comes from **result reading**, not the native solver 
 
 All 12 result tables matched the no-M9 control exactly for every candidate scenario, with no hydraulic solver warnings. Headloss and friction-factor values differ from stock due to the output-precision fix. Timing includes writing, complete solves and result reading, and excludes initial model loading and imports. The candidate was 2.19 times faster than original WNTR in the median paired comparison. On four regular grids with 9,944–39,484 links and a consistent compiler, median paired changes ranged from -0.60% to +1.73%; the 10,000-link activation condition is not a universal performance crossover. **The 2.2 download includes this M9 assembly**; results apply to the tested models and machine.
 
+🪟 **Full Jinan model: physical Windows feedback.** A collaborator reported testing the preview.8 encrypted 2.2 package on a physical Windows 11 x64 PC (Intel i7-1260P, 32 GB), CPython 3.12, WNTR 1.4.0 and four threads, with **137,298 nodes / 139,888 pipes**, 24 hours and 49 reporting times. One warm-up and three interleaved rounds, medians:
+
+| Configuration | Median full `run_sim` | vs. stock default |
+| --- | ---: | ---: |
+| Stock WNTR 2.2 + default reader | 21.45 s | Baseline |
+| Stock WNTR 2.2 + fast reader | 14.39 s | ⬇️ 32.9% |
+| Turbo 2.2 + default reader | 19.14 s | ⬇️ 10.8% |
+| **Turbo 2.2 + fast reader** | **13.89 s** | **⬇️ 35.2%** |
+
+Timings include writing, solving and reading; initial model loading and Python imports are excluded. The collaborator reported a roughly 19.5% reduction in a direct `ENsolveH` comparison, which does not isolate M9. The comparison excluded 706 reported source-free, zero-demand isolated nodes; for the other 136,592 nodes, maximum pressure difference was 9.35×10⁻⁵ m, reported maximum flow difference was 2.50×10⁻⁶ m³/s, and status and setting matched exactly. All 49 times had code 6 negative-pressure warnings; the reported minimum was about −50.08 m, with no code 110. This is collaborator-reported email feedback; the underlying scripts and data have not been independently reviewed here. It does not establish equality for all nodes or change the CHOLMOD safety boundary.
+
 🦀 A Rust fixed-width ID decoder was also tested in the reader. Over seven rounds on the same model, median paired result-reading time fell 4.95%; full simulation time fell 0.37%, with 4 / 7 rounds faster. This experimental path is not in the current downloads.
 
 ### 🚀 Full WNTR demand scenarios on one open project
@@ -322,6 +353,8 @@ The median paired reduction was **26.7%**. Timing includes the first snapshot, p
 
 🧪 Repeating the comparison on Linux x64 with the preview.8 GCC 12 M9 engine gave **4.316 s** for four independent runs and **3.069 s** with project reuse. The median paired reduction was **29.05%** over five rounds, with all result tables exactly equal. Batch setup and close are included.
 
+🪟 In the physical Windows full-model feedback above, four independent runs took **53.36 s** versus **37.17 s** with project reuse, a reduction of about **30%**. The collaborator reported that the result tables matched the independent runs exactly; the underlying records have not been independently reviewed here.
+
 Extract the 2.2 package for your platform and install its `requirements.txt`. This example selects the encrypted script directory for your CPython version:
 
 ```python
@@ -335,8 +368,8 @@ from turbo_wntr_batch import DemandScenarios
 
 network = wntr.network.WaterNetworkModel("your-model.inp")
 library = bundle / "native/macos_arm64/libepanet2.dylib"  # select your build below
-work = Path("output")
-work.mkdir(exist_ok=True)
+work = Path(r"C:\epanet_turbo_work") if sys.platform == "win32" else Path("output")
+work.mkdir(parents=True, exist_ok=True)
 
 with DemandScenarios(network, library, work_dir=work) as batch:
     for factor in (0.9, 1.0, 1.1, 0.9):
@@ -344,7 +377,9 @@ with DemandScenarios(network, library, work_dir=work) as batch:
         print(factor, results.node["pressure"].iloc[0, :5], batch.last_warnings)
 ```
 
-`batch.last_warnings` contains native warnings for the current scenario. Factors must be finite and positive. The model is snapshotted on context entry; create a new context after changing it. The API runs EPANET 2.2 water quality, not EPANET-MSX. Use a Latin-1 work path compatible with WNTR 1.4. For an ordinary single run, `TurboSimulator(network, library, fast_io=True)` enables both the fast writer and reader.
+`batch.last_warnings` contains native warnings for the current scenario. Factors must be finite and positive. The model is snapshotted on context entry; create a new context after changing it. The API runs EPANET 2.2 water quality, not EPANET-MSX. For an ordinary single run, `TurboSimulator(network, library, fast_io=True)` enables both the fast writer and reader.
+
+> 🪟 **Windows work paths:** WNTR 1.4 encodes native file paths using Latin-1. Choose a writable directory with an actual ASCII path for `work_dir` and the ordinary simulation's `file_prefix`, for example `C:\epanet_turbo_work`. `DemandScenarios` resolves the real `work_dir` path; a `subst` drive pointing to a Chinese directory can still cause `UnicodeEncodeError` after resolution. On Linux / macOS, work paths also need to be encodable by WNTR's Latin-1 handling.
 
 ### 🧰 2.2 / 2.3 bulk APIs for network-wide operations
 
@@ -387,6 +422,8 @@ bulk.set_demand_multiplier(0.9)    # standard EN_DEMANDMULT
 
 `BulkAPI(library, project)` also attaches to an open native project. It reads the loaded library's version and probes each capability: Turbo 2.2 / 2.3 use native bulk functions where available; other libraries use EPANET 2.3 native bulk reads or per-item fallback. Check `capabilities` for the selected path; scalar fallback preserves compatibility but has no native bulk speedup. Detection is based on the **loaded library, not the INP**; choose 2.2 or 2.3 to match your project. Ordinary WNTR `run_sim` does not automatically become a bulk workflow.
 
+💡 If a scheduling loop needs individual hydraulic steps and selected arrays, keep the Toolkit project open, call `ENopenH` / `ENinitH` once, then use `ENrunH` / `ENnextH` for steps and `BulkAPI` to read values. This avoids calling `TurboSimulator.run_sim`, which writes an INP and reads full results, on every iteration. Manage stepping and project close as required by the model.
+
 The [bulk and multi-scenario example](examples/bulk_auto_demo.py) selects the platform library from either bundle:
 
 ```bash
@@ -401,7 +438,7 @@ Choose one OS, CPU architecture and engine from the [download table above](#buil
 
 The bundled Linux x64 native libraries / OpenMP runtime require **glibc 2.34 or newer**; that minimum version itself has not been tested. Add `native/linux_x86_64` to `LD_LIBRARY_PATH` before starting Python.
 
-🧪 **Tested environments:** native macOS 27.0.1 arm64; native Linux x64 on Intel i7-14700KF / glibc 2.43; and a GitHub-hosted Windows Server 2022 x64 VM. Encrypted WNTR 1.4.0 and the Rust API were checked with CPython 3.11 / 3.12 on each platform. Windows also ran a single-step M9 check on a large synthetic network; physical Windows hardware has not been tested. The macOS runtime declares a minimum of macOS 14.0, which has not been tested on a real machine.
+🧪 **Tested environments:** native macOS 27.0.1 arm64; native Linux x64 on Intel i7-14700KF / glibc 2.43; and a GitHub-hosted Windows Server 2022 x64 VM. Encrypted WNTR 1.4.0 and the Rust API were checked with CPython 3.11 / 3.12 on each platform. The Windows VM also ran a single-step M9 check on a large synthetic network. A collaborator additionally reported testing the preview.8 **2.2 package and full Jinan model** on physical Windows 11 x64 with CPython 3.12; the underlying records have not been independently reviewed here. The macOS runtime declares a minimum of macOS 14.0, which has not been tested on a real machine.
 
 ### 🐍 Use with WNTR
 
@@ -410,6 +447,8 @@ Download and extract the **2.2-compatible encrypted archive**. Choose CPython 3.
 ```bash
 python -m pip install -r /path/to/unpacked/requirements.txt
 ```
+
+> 🐍 The protected package supports **CPython 3.11 / 3.12**, not Python 3.13. On Windows, use the real ASCII work path described above.
 
 Replace the example path with your extracted directory:
 
@@ -430,20 +469,21 @@ sys.path.insert(0, str(bundle / "python" / python_tag))
 
 import wntr
 from turbo_adapter import TurboSimulator
-from fast_wntr_reader import FastBinFile
 
 network = wntr.network.WaterNetworkModel("network.inp")
-simulator = TurboSimulator(network, bundle / "native" / "linux_x86_64" / "libepanet2.so")
-simulator.reader = FastBinFile()  # Optional: faster output reading
-results = simulator.run_sim(file_prefix="output/run", version=2.2)
+simulator = TurboSimulator(network, bundle / "native" / "linux_x86_64" / "libepanet2.so", fast_io=True)
+work = Path(r"C:\epanet_turbo_work") if sys.platform == "win32" else Path("output")
+work.mkdir(parents=True, exist_ok=True)
+results = simulator.run_sim(file_prefix=str(work / "run"), version=2.2)
 
 pressure = results.node["pressure"]
 flow = results.link["flowrate"]
 ```
 
-Create `output/` first; use `native/windows_x86_64/epanet2.dll` on Windows and `native/macos_arm64/libepanet2.dylib` on macOS. Omit the reader assignment to use WNTR's default reader. The fast reader can also be used with WNTR's own engine:
+Use `native/windows_x86_64/epanet2.dll` on Windows and `native/macos_arm64/libepanet2.dylib` on macOS. `fast_io=True` enables both fast writing and reading; omit it for the default writer and reader. The fast reader can also be used with WNTR's own engine:
 
 ```python
+from fast_wntr_reader import FastBinFile
 simulator = wntr.sim.EpanetSimulator(network, reader=FastBinFile())
 ```
 
